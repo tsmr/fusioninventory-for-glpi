@@ -162,19 +162,18 @@ INSERT INTO `glpi_displaypreferences` (`itemtype`, `num`, `rank`, `users_id`) VA
 
 DROP TABLE IF EXISTS `glpi_plugin_fusinvinventory_licenseinfos`;
 
-CREATE TABLE IF NOT EXISTS `glpi_plugin_fusinvinventory_licenseinfos` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `computers_id` int(11) NOT NULL DEFAULT '0',
-  `name` varchar(255) DEFAULT NULL,
-  `fullname` varchar(255) DEFAULT NULL,
-  `key` varchar(255) DEFAULT NULL,
-  `is_trial` tinyint(1) NOT NULL DEFAULT '0',
-  `is_update` tinyint(1) NOT NULL DEFAULT '0',
-  `is_oem` tinyint(1) NOT NULL DEFAULT '0',
-  `activation_date` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `name` (`name`),
-  KEY `fullname` (`fullname`)
+CREATE TABLE `glpi_plugin_fusinvinventory_licenseinfos` (
+   `id`              INT(11)        NOT NULL    AUTO_INCREMENT,
+   `computers_id`    INT(11)        NOT NULL    DEFAULT 0,
+   `name`            VARCHAR(255)   DEFAULT     NULL,
+   `fullname`        VARCHAR(255)   DEFAULT     NULL,
+   `key`             VARCHAR(255)   DEFAULT     NULL,
+   `is_trial`        TINYINT(1)     NOT NULL    DEFAULT 0,
+   `is_update`       TINYINT(1)     NOT NULL    DEFAULT 0,
+   `is_oem`          TINYINT(1)     NOT NULL    DEFAULT 0,
+   `activation_date` DATETIME       DEFAULT     NULL,
+   PRIMARY KEY (`id`),
+   KEY (`computers_id`)
+   KEY `name` (`name`),
+   KEY `fullname` (`fullname`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=1;
-
-

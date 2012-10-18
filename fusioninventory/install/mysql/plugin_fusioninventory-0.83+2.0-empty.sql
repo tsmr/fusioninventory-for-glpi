@@ -368,19 +368,3 @@ INSERT INTO `glpi_displaypreferences` (`id`, `itemtype`, `num`, `rank`, `users_i
 
 
 
-
-DROP TABLE IF EXISTS `glpi_plugin_fusinvinventory_licenseinfos`;
-
-CREATE TABLE `glpi_plugin_fusinvinventory_licenseinfos` (
-   `id`              INT(11)        NOT NULL    AUTO_INCREMENT,
-   `computers_id`    INT(11)        NOT NULL    DEFAULT 0,
-   `name`            VARCHAR(255)   DEFAULT     NULL,
-   `fullname`        VARCHAR(255)   DEFAULT     NULL,
-   `key`             VARCHAR(255)   DEFAULT     NULL,
-   `is_trial`        TINYINT(1)     NOT NULL    DEFAULT 0,
-   `is_update`       TINYINT(1)     NOT NULL    DEFAULT 0,
-   `is_oem`          TINYINT(1)     NOT NULL    DEFAULT 0,
-   `activation_date` DATETIME       DEFAULT     NULL,
-   PRIMARY KEY (`id`),
-   KEY (`computers_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
