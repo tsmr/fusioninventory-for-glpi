@@ -228,6 +228,14 @@ class PluginFusinvinventoryInventory {
             $input['name'] = '';
          }
          $input['itemtype'] = "Computer";
+
+         //VM LINK
+         if (isset($xml->CONTENT->HARDWARE->VMSYSTEM)) {
+            $input['vmname'] = (string)$xml->CONTENT->HARDWARE->VMNAME;
+            $input['vmid']   = (string)$xml->CONTENT->HARDWARE->VMID;
+            $input['vmfull'] = (string)$xml->CONTENT->HARDWARE->VMID.":".
+                                       $xml->CONTENT->HARDWARE->VMNAME;
+         }
          
          // If transfer is disable, get entity and search only on this entity (see http://forge.fusioninventory.org/issues/1503)
          $pfConfig = new PluginFusioninventoryConfig();
@@ -250,6 +258,7 @@ class PluginFusinvinventoryInventory {
             }
          }
          // End transfer disabled
+      
          
       $_SESSION['plugin_fusioninventory_classrulepassed'] = "PluginFusinvinventoryInventory";
       $rule = new PluginFusioninventoryRuleImportEquipmentCollection();
@@ -257,6 +266,7 @@ class PluginFusinvinventoryInventory {
       $data = $rule->processAllRules($input, array(), array('class'=>$this));
       PluginFusioninventoryLogger::logIfExtradebug("pluginFusioninventory-rules", 
                                                    print_r($data, true));
+
       if (isset($data['_no_rule_matches']) AND ($data['_no_rule_matches'] == '1')) {
          $this->rulepassed(0, "Computer");
       } else if (!isset($data['found_equipment'])) {

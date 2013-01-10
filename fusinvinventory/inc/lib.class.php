@@ -78,7 +78,7 @@ class PluginFusinvinventoryLib extends CommonDBTM {
             $_SESSION["plugin_fusinvinventory_ignorecontrollers"][(string)$child->NAME] = 1;
          }
       }
-      
+
       if ($new == "0") {
          // Transfer if entity is different
          $Computer = new Computer();
