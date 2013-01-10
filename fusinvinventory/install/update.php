@@ -40,6 +40,11 @@
    ------------------------------------------------------------------------
  */
 
+ALTER TABLE glpi_plugin_fusinvinventory_computers ADD COLUMN `vmname` VARCHAR(255) DEFAULT NULL;
+ALTER TABLE glpi_plugin_fusinvinventory_computers ADD COLUMN `vmid` VARCHAR(255) DEFAULT NULL;
+ALTER TABLE glpi_plugin_fusinvinventory_computers ADD COLUMN `vmfull` VARCHAR(255) DEFAULT NULL;
+
+
 function pluginFusinvinventoryGetCurrentVersion($version) {
    global $DB;
 
