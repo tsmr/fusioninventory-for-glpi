@@ -347,6 +347,13 @@ class PluginFusinvinventoryLibhook {
                if (isset($dataSection['WINCOMPANY'])) {
                   $inputCext['wincompany'] = $dataSection['WINCOMPANY'];
                }
+
+               if (isset($dataSection['VMSYSTEM'])) {
+                  $inputCext['vmid']   = $dataSection['VMID'];
+                  $inputCext['vmname'] = $dataSection['VMNAME'];
+                  $inputCext['vmfull'] = $dataSection['VMID'].":".$dataSection['VMNAME'];
+               }
+
                break;
 
             case 'PRINTERS':
