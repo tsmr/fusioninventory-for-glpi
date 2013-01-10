@@ -141,6 +141,9 @@ class PluginFusioninventoryRuleImportEquipment extends Rule {
       $criterias['itemtype']['is_global']       = false;
       $criterias['itemtype']['allow_condition'] = array(Rule::PATTERN_IS, Rule::PATTERN_IS_NOT);
 
+      //VM LINK
+      $criterias['vmfull']['name']          = $LANG['plugin_fusioninventory']['rulesengine'][152].' : VMID+VMNAME';
+
       return $criterias;
    }
 
@@ -316,7 +319,9 @@ class PluginFusioninventoryRuleImportEquipment extends Rule {
                                  'uuid',
                                  'mskey',
                                  'name',
-                                 'itemtype');
+                                 'itemtype', 
+                                 'vmfull');
+
       $nb_crit_find = 0;
       foreach ($global_criteria as $criterion) {
          $criteria = $this->getCriteriaByID($criterion);
@@ -505,6 +510,11 @@ class PluginFusioninventoryRuleImportEquipment extends Rule {
             case 'uuid':
                $sql_where_computer .= ' AND `uuid`="'.$input['uuid'].'"';
                break;
+            case 'vmfull':
+               $sql_from .= "INNER JOIN glpi_plugin_fusinvinventory_computers 
+                  ON glpi_plugin_fusinvinventory_computers.computers_id = `[typetable]`.id";
+               $sql_where_computer .= ' AND `vmfull`="'.$input['vmfull'].'"';
+               break;
 
          }
       }
@@ -581,6 +591,7 @@ class PluginFusioninventoryRuleImportEquipment extends Rule {
     * @return the $output array modified
    **/
    function executeActions($output, $params) {
+
       if (isset($params['class'])) {
          $class = $params['class'];
       } else if (isset($_SESSION['plugin_fusioninventory_classrulepassed'])) {
@@ -640,6 +651,7 @@ class PluginFusioninventoryRuleImportEquipment extends Rule {
                            foreach ($this->criterias as $criteria){
                               if ($criteria->fields['criteria'] == 'itemtype') {
                                  $itemtype = $criteria->fields['pattern'];
+
                                  if (isset($_SESSION['plugin_fusioninventory_classrulepassed'])) {
                                     $_SESSION['plugin_fusioninventory_rules_id'] = $this->fields['id'];
                                     $class->rulepassed("0", $itemtype);
@@ -650,6 +662,12 @@ class PluginFusioninventoryRuleImportEquipment extends Rule {
                                  }
                                  $itemtype_found = 1;
                               }
+                           }
+
+                           if ($criteria->fields['criteria'] == 'vmfull') {
+                              $_SESSION['plugin_fusioninventory_rules_id'] = $this->fields['id'];
+                              $class->rulepassed("0", "Computer");
+                              return $output;
                            }
                         }
                         if ($itemtype_found == "0") {
