@@ -29,14 +29,14 @@
 
    @package   FusionInventory
    @author    David Durieux
-   @co-author 
+   @co-author
    @copyright Copyright (c) 2010-2012 FusionInventory team
    @license   AGPL License 3.0 or (at your option) any later version
               http://www.gnu.org/licenses/agpl-3.0-standalone.html
    @link      http://www.fusioninventory.org/
    @link      http://forge.fusioninventory.org/projects/fusioninventory-for-glpi/
    @since     2010
- 
+
    ------------------------------------------------------------------------
  */
 
@@ -46,7 +46,7 @@ if (!defined('GLPI_ROOT')) {
 
 class PluginFusinvinventoryInventory {
    private $p_xml;
-   
+
    /**
    * Import data
    *
@@ -88,29 +88,29 @@ class PluginFusinvinventoryInventory {
    function sendCriteria($p_DEVICEID, $p_CONTENT, $p_xml) {
 
       // Hack
-          
+
          // Hack to put OS in software
          $sxml_soft = $p_xml->CONTENT->addChild('SOFTWARES');
          $sxml_soft->addChild('COMMENTS', (string)$p_xml->CONTENT->HARDWARE->OSCOMMENTS);
          $sxml_soft->addChild('NAME', (string)$p_xml->CONTENT->HARDWARE->OSNAME);
          $sxml_soft->addChild('VERSION', (string)$p_xml->CONTENT->HARDWARE->OSVERSION);
-      
+
          // Hack for USB Printer serial
          if (isset($p_xml->CONTENT->PRINTERS)) {
             foreach($p_xml->CONTENT->PRINTERS as $printer) {
-               if ((isset($printer->SERIAL)) 
+               if ((isset($printer->SERIAL))
                        AND (preg_match('/\/$/', (string)$printer->SERIAL))) {
                   $printer->SERIAL = preg_replace('/\/$/', '', (string)$printer->SERIAL);
                }
             }
          }
-         
+
          // Hack to remove Memories with Flash types see ticket http://forge.fusioninventory.org/issues/1337
          if (isset($p_xml->CONTENT->MEMORIES)) {
             $i = 0;
             $arrayName = array();
             foreach($p_xml->CONTENT->MEMORIES as $memory) {
-               if ((isset($memory->TYPE)) 
+               if ((isset($memory->TYPE))
                        AND (preg_match('/Flash/', (string)$memory->TYPE))) {
 
                   $arrayName[] = $i;
@@ -122,7 +122,7 @@ class PluginFusinvinventoryInventory {
             }
          }
       // End hack
-         
+
       // Know if computer is HP to remove S in prefix of serial number
          if ((isset($p_xml->CONTENT->BIOS->SMANUFACTURER))
                AND (strstr($p_xml->CONTENT->BIOS->SMANUFACTURER, "ewlett"))) {
@@ -133,9 +133,9 @@ class PluginFusinvinventoryInventory {
                unset($_SESSION["plugin_fusioninventory_manufacturerHP"]);
             }
          }
-                  
+
       // End code for HP computers
-      
+
       // Get tag is defined and put it in fusioninventory_agent table
          if (isset($p_xml->CONTENT->ACCOUNTINFO)) {
             foreach($p_xml->CONTENT->ACCOUNTINFO as $tag) {
@@ -148,13 +148,13 @@ class PluginFusinvinventoryInventory {
                      $input['id'] = $_SESSION['plugin_fusioninventory_agents_id'];
                      $input['tag'] = $tag->KEYVALUE;
                      $pfAgent->update($input);
-                  }                  
+                  }
                }
             }
          }
-         
-         
-         
+
+
+
       $pfBlacklist = new PluginFusinvinventoryBlacklist();
       $p_xml = $pfBlacklist->cleanBlacklist($p_xml);
 
@@ -163,7 +163,7 @@ class PluginFusinvinventoryInventory {
 
       $xml = $p_xml;
       $input = array();
-      
+
       // Global criterias
 
          if ((isset($xml->CONTENT->BIOS->SSN)) AND (!empty($xml->CONTENT->BIOS->SSN))) {
@@ -190,11 +190,11 @@ class PluginFusinvinventoryInventory {
                }
             }
          }
-         if ((isset($xml->CONTENT->HARDWARE->WINPRODKEY)) 
+         if ((isset($xml->CONTENT->HARDWARE->WINPRODKEY))
                AND (!empty($xml->CONTENT->HARDWARE->WINPRODKEY))) {
             $input['mskey'] = (string)$xml->CONTENT->HARDWARE->WINPRODKEY;
          }
-         if ((isset($xml->CONTENT->HARDWARE->OSNAME)) 
+         if ((isset($xml->CONTENT->HARDWARE->OSNAME))
                AND (!empty($xml->CONTENT->HARDWARE->OSNAME))) {
             $input['osname'] = (string)$xml->CONTENT->HARDWARE->OSNAME;
 
@@ -221,7 +221,7 @@ class PluginFusinvinventoryInventory {
                $input['tag'] = (string)$xml->CONTENT->ACCOUNTINFO->KEYVALUE;
             }
          }
-         if ((isset($xml->CONTENT->HARDWARE->NAME)) 
+         if ((isset($xml->CONTENT->HARDWARE->NAME))
                  AND ((string)$xml->CONTENT->HARDWARE->NAME != '')) {
             $input['name'] = (string)$xml->CONTENT->HARDWARE->NAME;
          } else {
@@ -233,10 +233,10 @@ class PluginFusinvinventoryInventory {
          if (isset($xml->CONTENT->HARDWARE->VMSYSTEM)) {
             $input['vmname'] = (string)$xml->CONTENT->HARDWARE->VMNAME;
             $input['vmid']   = (string)$xml->CONTENT->HARDWARE->VMID;
-            $input['vmfull'] = (string)$xml->CONTENT->HARDWARE->VMID.":".
-                                       $xml->CONTENT->HARDWARE->VMNAME;
+            $input['vmfull'] = (string)$xml->CONTENT->BIOS->SSN.":".
+                                       $xml->CONTENT->HARDWARE->VMID;
          }
-         
+
          // If transfer is disable, get entity and search only on this entity (see http://forge.fusioninventory.org/issues/1503)
          $pfConfig = new PluginFusioninventoryConfig();
          $plugins_id = PluginFusioninventoryModule::getModuleId('fusinvinventory');
@@ -258,13 +258,13 @@ class PluginFusinvinventoryInventory {
             }
          }
          // End transfer disabled
-      
-         
+
+
       $_SESSION['plugin_fusioninventory_classrulepassed'] = "PluginFusinvinventoryInventory";
       $rule = new PluginFusioninventoryRuleImportEquipmentCollection();
       $data = array();
       $data = $rule->processAllRules($input, array(), array('class'=>$this));
-      PluginFusioninventoryLogger::logIfExtradebug("pluginFusioninventory-rules", 
+      PluginFusioninventoryLogger::logIfExtradebug("pluginFusioninventory-rules",
                                                    print_r($data, true));
 
       if (isset($data['_no_rule_matches']) AND ($data['_no_rule_matches'] == '1')) {
@@ -275,7 +275,7 @@ class PluginFusinvinventoryInventory {
          $inputdb['name'] = $input['name'];
          $inputdb['date'] = date("Y-m-d H:i:s");
          $inputdb['itemtype'] = "Computer";
-         
+
          if ((isset($xml->CONTENT->HARDWARE->WORKGROUP)) AND (!empty($xml->CONTENT->HARDWARE->WORKGROUP))) {
             $input['domain'] = Toolbox::addslashes_deep((string)$xml->CONTENT->HARDWARE->WORKGROUP);
          }
@@ -290,7 +290,7 @@ class PluginFusinvinventoryInventory {
                $inputdb['entities_id'] = $dataEntity['entities_id'];
             }
          }
-         
+
          if (isset($input['ip'])) {
             $inputdb['ip'] = exportArrayToDB($input['ip']);
          }
@@ -302,7 +302,7 @@ class PluginFusinvinventoryInventory {
          $pFusioninventoryIgnoredimportdevice->add($inputdb);
       }
    }
-   
+
 
 
    /**
@@ -324,7 +324,7 @@ class PluginFusinvinventoryInventory {
       //$xml = simplexml_load_string($_SESSION['SOURCEXML'],'SimpleXMLElement', LIBXML_NOCDATA);
       //$xml = $_SESSION['SOURCEXML'];
       $xml = $this->p_xml;
-      
+
       if ($itemtype == 'Computer') {
          $pfLib = new PluginFusinvinventoryLib();
          $Computer = new Computer();
@@ -352,7 +352,7 @@ class PluginFusinvinventoryInventory {
             if ((isset($xml->CONTENT->HARDWARE->WORKGROUP)) AND (!empty($xml->CONTENT->HARDWARE->WORKGROUP))) {
                $input_rules['domain'] = (string)$xml->CONTENT->HARDWARE->WORKGROUP;
             }
-            if ((isset($xml->CONTENT->ACCOUNTINFO->KEYNAME)) 
+            if ((isset($xml->CONTENT->ACCOUNTINFO->KEYNAME))
                   AND ($xml->CONTENT->ACCOUNTINFO->KEYNAME == 'TAG')) {
                if (isset($xml->CONTENT->ACCOUNTINFO->KEYVALUE)) {
                   $input_rules['tag'] = (string)$xml->CONTENT->ACCOUNTINFO->KEYVALUE;
@@ -374,7 +374,7 @@ class PluginFusinvinventoryInventory {
             } else {
                $_SESSION["plugin_fusinvinventory_entity"] = "N/A";
             }
-            
+
 
             PluginFusioninventoryLogger::logIfExtradebug(
                "pluginFusinvinventory-entityrules",
@@ -416,8 +416,8 @@ class PluginFusinvinventoryInventory {
             $computer = new Computer();
             $operatingSystem = new OperatingSystem();
             $computer->getFromDB($items_id);
-            if ((isset($xml->CONTENT->HARDWARE->OSNAME)) 
-                    AND ($computer->fields['operatingsystems_id'] 
+            if ((isset($xml->CONTENT->HARDWARE->OSNAME))
+                    AND ($computer->fields['operatingsystems_id']
                             != $operatingSystem->importExternal((string)$xml->CONTENT->HARDWARE->OSNAME,
                                                                 $_SESSION["plugin_fusinvinventory_entity"]))) {
                $_SESSION["plugin_fusinvinventory_history_add"] = false;
@@ -427,7 +427,7 @@ class PluginFusinvinventoryInventory {
          }
 
          //== specific case for vm master creation (AIX LPAR) ==
-         if (isset($xml->CONTENT->HARDWARE->VMSYSTEM) 
+         if (isset($xml->CONTENT->HARDWARE->VMSYSTEM)
                && $xml->CONTENT->HARDWARE->VMSYSTEM == "AIX_LPAR") {
             $vmname = $xml->CONTENT->HARDWARE->VMNAME;
 
@@ -463,8 +463,8 @@ class PluginFusinvinventoryInventory {
                ));
             }
          }
-         
-         
+
+
       } else if ($itemtype == 'PluginFusioninventoryUnknownDevice') {
          $class = new $itemtype();
          if ($items_id == "0") {
@@ -491,12 +491,12 @@ class PluginFusinvinventoryInventory {
          $_SESSION["plugin_fusinvinventory_entity"] = $class->fields['entities_id'];
          $input = array();
          $input['id'] = $class->fields['id'];
-         
+
          // Write XML file
          if (isset($xml)) {
             PluginFusioninventoryUnknownDevice::writeXML($items_id, $xml->asXML());
          }
-         
+
          if (isset($xml->CONTENT->HARDWARE->NAME)) {
             $input['name'] = (string)$xml->CONTENT->HARDWARE->NAME;
          }
@@ -514,28 +514,28 @@ class PluginFusinvinventoryInventory {
          $class->update($input);
       }
    }
-   
-   
+
+
 
    /**
     * Get default value for state of devices (monitor, printer...)
-    * 
+    *
     * @param type $input
     * @param type $check_management
-    * @param type $management_value 
-    * 
+    * @param type $management_value
+    *
     */
    static function addDefaultStateIfNeeded(&$input, $check_management = false, $management_value = 0) {
       $config = new PluginFusioninventoryConfig();
       $state = $config->getValue($_SESSION["plugin_fusinvinventory_moduleid"], "states_id_default");
       if ($state) {
          if (!$check_management || ($check_management && !$management_value)) {
-            $input['states_id'] = $state;         
-         }      
+            $input['states_id'] = $state;
+         }
       }
    }
-   
-   
+
+
 
    /**
    * Create GLPI existant computer (never in lib) in Lib FusionInventory
@@ -570,7 +570,7 @@ class PluginFusinvinventoryInventory {
          $xml_networks->addChild("IPSUBNET", $networkport_data['subnet']);
          $xml_networks->addChild("IPGATEWAY", $networkport_data['gateway']);
          $xml_networks->addChild("DESCRIPTION", $networkport_data['name']);
-         $network_type = Dropdown::getDropdownName('glpi_networkinterfaces', 
+         $network_type = Dropdown::getDropdownName('glpi_networkinterfaces',
                                                    $networkport_data['networkinterfaces_id']);
          if ($network_type != "&nbsp;") {
             $xml_networks->addChild("TYPE", $network_type);
@@ -581,17 +581,17 @@ class PluginFusinvinventoryInventory {
       $xml_bios = $xml_content->addChild("BIOS");
       $a_sectionsinfos[] = "BIOS/".$items_id;
       $xml_bios->addChild("SSN", $datas['serial']);
-      $manufacturer = Dropdown::getDropdownName(getTableForItemType('Manufacturer'), 
+      $manufacturer = Dropdown::getDropdownName(getTableForItemType('Manufacturer'),
                                                 $datas['manufacturers_id']);
       if ($manufacturer != "&nbsp;") {
          $xml_bios->addChild("SMANUFACTURER", $manufacturer);
       }
-      $model = Dropdown::getDropdownName(getTableForItemType('ComputerModel'), 
+      $model = Dropdown::getDropdownName(getTableForItemType('ComputerModel'),
                                          $datas['computermodels_id']);
       if ($model != "&nbsp;") {
          $xml_bios->addChild("SMODEL", $model);
       }
-      $type = Dropdown::getDropdownName(getTableForItemType('ComputerType'), 
+      $type = Dropdown::getDropdownName(getTableForItemType('ComputerType'),
                                         $datas['computertypes_id']);
       if ($type != "&nbsp;") {
          $xml_bios->addChild("TYPE", $type);
@@ -601,12 +601,12 @@ class PluginFusinvinventoryInventory {
       $xml_hardware = $xml_content->addChild("HARDWARE");
       $a_sectionsinfos[] = "HARDWARE/".$items_id;
       $xml_hardware->addChild("NAME", $datas['name']);
-      $osname = Dropdown::getDropdownName(getTableForItemType('OperatingSystem'), 
+      $osname = Dropdown::getDropdownName(getTableForItemType('OperatingSystem'),
                                           $datas['operatingsystems_id']);
       if ($osname != "&nbsp;") {
          $xml_bios->addChild("OSNAME", $osname);
       }
-      $osversion = Dropdown::getDropdownName(getTableForItemType('OperatingSystemVersion'), 
+      $osversion = Dropdown::getDropdownName(getTableForItemType('OperatingSystemVersion'),
                                              $datas['operatingsystemversions_id']);
       if ($osversion != "&nbsp;") {
          $xml_bios->addChild("OSVERSION", $osversion);
@@ -628,7 +628,7 @@ class PluginFusinvinventoryInventory {
          $xml_controller = $xml_content->addChild("CONTROLLERS");
          $DeviceControl->getFromDB($deviceControl_data['devicecontrols_id']);
          $xml_controller->addChild("CAPTION", $DeviceControl->fields['designation']);
-         $manufacturer = Dropdown::getDropdownName(getTableForItemType('Manufacturer'), 
+         $manufacturer = Dropdown::getDropdownName(getTableForItemType('Manufacturer'),
                                                    $DeviceControl->fields['manufacturers_id']);
          if ($manufacturer != "&nbsp;") {
             $xml_controller->addChild("MANUFACTURER", $manufacturer);
@@ -646,13 +646,13 @@ class PluginFusinvinventoryInventory {
          $DeviceProcessor->getFromDB($deviceProcessor_data['deviceprocessors_id']);
          $xml_cpu->addChild("NAME", $DeviceProcessor->fields['designation']);
          $xml_cpu->addChild("SPEED", $deviceProcessor_data['specificity']);
-         $manufacturer = Dropdown::getDropdownName(getTableForItemType('Manufacturer'), 
+         $manufacturer = Dropdown::getDropdownName(getTableForItemType('Manufacturer'),
                                                    $DeviceProcessor->fields['manufacturers_id']);
          if ($manufacturer != "&nbsp;") {
             $xml_cpu->addChild("MANUFACTURER", $manufacturer);
          }
       }
-      
+
       // ** STORAGE
       $CompDeviceDrive = new Computer_Device('DeviceDrive');
       $DeviceDrive = new DeviceDrive();
@@ -663,12 +663,12 @@ class PluginFusinvinventoryInventory {
          $DeviceDrive->getFromDB($deviceDrive_data['devicedrives_id']);
          $xml_storage->addChild("NAME", $DeviceDrive->fields['designation']);
          $xml_storage->addChild("MODEL", $DeviceDrive->fields['designation']);
-         $manufacturer = Dropdown::getDropdownName(getTableForItemType('Manufacturer'), 
+         $manufacturer = Dropdown::getDropdownName(getTableForItemType('Manufacturer'),
                                                    $DeviceDrive->fields['manufacturers_id']);
          if ($manufacturer != "&nbsp;") {
             $xml_storage->addChild("MANUFACTURER", $manufacturer);
          }
-         $interface = Dropdown::getDropdownName(getTableForItemType('InterfaceType'), 
+         $interface = Dropdown::getDropdownName(getTableForItemType('InterfaceType'),
                                                 $DeviceDrive->fields['interfacetypes_id']);
          if ($interface != "&nbsp;") {
             $xml_storage->addChild("INTERFACE", $interface);
@@ -683,12 +683,12 @@ class PluginFusinvinventoryInventory {
          $DeviceHardDrive->getFromDB($DeviceHardDrive_data['deviceharddrives_id']);
          $xml_storage->addChild("NAME", $DeviceHardDrive->fields['designation']);
          $xml_storage->addChild("MODEL", $DeviceHardDrive->fields['designation']);
-         $manufacturer = Dropdown::getDropdownName(getTableForItemType('Manufacturer'), 
+         $manufacturer = Dropdown::getDropdownName(getTableForItemType('Manufacturer'),
                                                    $DeviceHardDrive->fields['manufacturers_id']);
          if ($manufacturer != "&nbsp;") {
             $xml_storage->addChild("MANUFACTURER", $manufacturer);
          }
-         $interface = Dropdown::getDropdownName(getTableForItemType('InterfaceType'), 
+         $interface = Dropdown::getDropdownName(getTableForItemType('InterfaceType'),
                                                 $DeviceHardDrive->fields['interfacetypes_id']);
          if ($interface != "&nbsp;") {
             $xml_storage->addChild("INTERFACE", $interface);
@@ -704,7 +704,7 @@ class PluginFusinvinventoryInventory {
          $xml_drive->addChild("LABEL", $disk_data['name']);
          $xml_drive->addChild("VOLUMN", $disk_data['device']);
          $xml_drive->addChild("MOUNTPOINT", $disk_data['mountpoint']);
-         $filesystem = Dropdown::importExternal('Filesystem', 
+         $filesystem = Dropdown::importExternal('Filesystem',
                                                 $disk_data['filesystems_id'],
                                                 $_SESSION["plugin_fusinvinventory_entity"]);
          if ($filesystem != "&nbsp;") {
@@ -726,7 +726,7 @@ class PluginFusinvinventoryInventory {
          $xml_memory->addChild("DESCRIPTION", $DeviceMemory->fields['designation']);
          $xml_memory->addChild("CAPACITY", $deviceMemory_data['specificity']);
          $xml_memory->addChild("SPEED", $DeviceMemory->fields['frequence']);
-         $type = Dropdown::getDropdownName(getTableForItemType('DeviceMemoryType'), 
+         $type = Dropdown::getDropdownName(getTableForItemType('DeviceMemoryType'),
                                            $DeviceMemory->fields['devicememorytypes_id']);
          if ($type != "&nbsp;") {
             $xml_memory->addChild("TYPE", $type);
@@ -744,7 +744,7 @@ class PluginFusinvinventoryInventory {
          $xml_monitor = $xml_content->addChild("MONITORS");
          $Monitor->getFromDB($ComputerMonitor_data['items_id']);
          $xml_monitor->addChild("CAPTION", $Monitor->fields['name']);
-         $manufacturer = Dropdown::getDropdownName(getTableForItemType('Manufacturer'), 
+         $manufacturer = Dropdown::getDropdownName(getTableForItemType('Manufacturer'),
                                                    $Monitor->fields['manufacturers_id']);
          if ($manufacturer != "&nbsp;") {
             $xml_monitor->addChild("MANUFACTURER", $manufacturer);
@@ -769,7 +769,7 @@ class PluginFusinvinventoryInventory {
             $xml_printer->addChild("PORT", 'USB');
          }
       }
-      
+
 
       // ** SOFTWARE
       $Computer_SoftwareVersion = new Computer_SoftwareVersion();
@@ -783,14 +783,14 @@ class PluginFusinvinventoryInventory {
          $xml_software = $xml_content->addChild("SOFTWARES");
          $xml_software->addChild("NAME", $Software->fields['name']);
          $xml_software->addChild("VERSION", $SoftwareVersion->fields['name']);
-         $manufacturer = Dropdown::getDropdownName(getTableForItemType('Manufacturer'), 
+         $manufacturer = Dropdown::getDropdownName(getTableForItemType('Manufacturer'),
                                                    $Software->fields['manufacturers_id']);
          if ($manufacturer != "&nbsp;") {
             $xml_software->addChild("PUBLISHER", $manufacturer);
          }
       }
 
-      
+
       // ** SOUNDS
       $CompDeviceSoundCard = new Computer_Device('DeviceSoundCard');
       $DeviceSoundCard = new DeviceSoundCard();
@@ -801,13 +801,13 @@ class PluginFusinvinventoryInventory {
          $DeviceSoundCard->getFromDB($deviceSoundCard_data['devicesoundcards_id']);
          $xml_sound->addChild("NAME", $DeviceSoundCard->fields['designation']);
          $xml_sound->addChild("DESCRIPTION", $DeviceSoundCard->fields['comment']);
-         $manufacturer = Dropdown::getDropdownName(getTableForItemType('Manufacturer'), 
+         $manufacturer = Dropdown::getDropdownName(getTableForItemType('Manufacturer'),
                                                    $DeviceSoundCard->fields['manufacturers_id']);
          if ($manufacturer != "&nbsp;") {
             $xml_sound->addChild("MANUFACTURER", $manufacturer);
          }
       }
-     
+
 
       // ** VIDEOS
       $CompDeviceGraphicCard = new Computer_Device('DeviceGraphicCard');
@@ -830,19 +830,19 @@ class PluginFusinvinventoryInventory {
          $xml_virtualmachine->addChild("MEMORY", $VirtualMachines_data['ram']."MB");
          $xml_virtualmachine->addChild("NAME", $VirtualMachines_data['name']);
 
-         $xml_virtualmachine->addChild("STATUS", 
+         $xml_virtualmachine->addChild("STATUS",
                                        Dropdown::getDropdownName("glpi_virtualmachinestates",
                                                                  $VirtualMachines_data['virtualmachinestates_id']));
-         $xml_virtualmachine->addChild("SUBSYSTEM", 
+         $xml_virtualmachine->addChild("SUBSYSTEM",
                                        Dropdown::getDropdownName("glpi_virtualmachinesystems",
                                                                  $VirtualMachines_data['virtualmachinesystems_id']));
          $xml_virtualmachine->addChild("UUID", $VirtualMachines_data['uuid']);
          $xml_virtualmachine->addChild("VCPU", $VirtualMachines_data['vcpu']);
-         $xml_virtualmachine->addChild("VMTYPE", 
+         $xml_virtualmachine->addChild("VMTYPE",
                                        Dropdown::getDropdownName("glpi_virtualmachinetypes",
                                                                  $VirtualMachines_data['virtualmachinetypes_id']));
       }
-      
+
       // ** USBDEVICES (PERIPHERALS)
       $Peripheral = new Peripheral();
       $Computer_Item = new Computer_Item();
@@ -856,17 +856,17 @@ class PluginFusinvinventoryInventory {
             $xml_peripheral->addChild("SERIAL", $Peripheral->fields['serial']);
          }
       }
-      
+
       $pfLib = new PluginFusinvinventoryLib();
       $pfLib->addLibMachineFromGLPI($items_id, $internal_id, $xml, $a_sectionsinfos);
    }
-   
-   
-   
+
+
+
    /**
     * Return method name of this class/plugin
-    * 
-    * @return value  
+    *
+    * @return value
     */
    static function getMethod() {
       return 'inventory';

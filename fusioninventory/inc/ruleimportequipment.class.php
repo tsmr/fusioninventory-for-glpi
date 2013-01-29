@@ -29,14 +29,14 @@
 
    @package   FusionInventory
    @author    David Durieux
-   @co-author 
+   @co-author
    @copyright Copyright (c) 2010-2012 FusionInventory team
    @license   AGPL License 3.0 or (at your option) any later version
               http://www.gnu.org/licenses/agpl-3.0-standalone.html
    @link      http://www.fusioninventory.org/
    @link      http://forge.fusioninventory.org/projects/fusioninventory-for-glpi/
    @since     2010
- 
+
    ------------------------------------------------------------------------
  */
 
@@ -86,7 +86,7 @@ class PluginFusioninventoryRuleImportEquipment extends Rule {
       return 1;
    }
 
-   
+
    function getCriterias() {
       global $LANG;
 
@@ -142,12 +142,12 @@ class PluginFusioninventoryRuleImportEquipment extends Rule {
       $criterias['itemtype']['allow_condition'] = array(Rule::PATTERN_IS, Rule::PATTERN_IS_NOT);
 
       //VM LINK
-      $criterias['vmfull']['name']          = $LANG['plugin_fusioninventory']['rulesengine'][152].' : VMID+VMNAME';
+      $criterias['vmfull']['name']          = $LANG['plugin_fusioninventory']['rulesengine'][152].' : serial+VMID';
 
       return $criterias;
    }
 
-   
+
 
    function getActions() {
       global $LANG;
@@ -162,7 +162,7 @@ class PluginFusioninventoryRuleImportEquipment extends Rule {
       return $actions;
    }
 
-   
+
 
    static function getRuleActionValues() {
       global $LANG;
@@ -173,7 +173,7 @@ class PluginFusioninventoryRuleImportEquipment extends Rule {
    }
 
 
-   
+
    /**
     * Add more action values specific to this type of rule
     *
@@ -190,7 +190,7 @@ class PluginFusioninventoryRuleImportEquipment extends Rule {
       return '';
    }
 
-   
+
 
    function manageSpecificCriteriaValues($criteria, $name, $value) {
       global $LANG;
@@ -206,7 +206,7 @@ class PluginFusioninventoryRuleImportEquipment extends Rule {
       return false;
    }
 
-   
+
 
    /**
     * Add more criteria specific to this type of rule
@@ -217,7 +217,7 @@ class PluginFusioninventoryRuleImportEquipment extends Rule {
       return array(Rule::PATTERN_FIND     => $LANG['rulesengine'][151],
                    self::PATTERN_IS_EMPTY => $LANG['rulesengine'][154]);
    }
-   
+
 
 
    function getAdditionalCriteriaDisplayPattern($ID, $condition, $pattern) {
@@ -231,12 +231,12 @@ class PluginFusioninventoryRuleImportEquipment extends Rule {
 
          if (isset($crit['type'])) {
             switch ($crit['type']) {
-               
+
                case "dropdown_itemtype":
                   $array = $this->getTypes();
                   return $array[$pattern];
-                  break;            
-               
+                  break;
+
             }
          }
       }
@@ -244,9 +244,9 @@ class PluginFusioninventoryRuleImportEquipment extends Rule {
    }
 
 
-   
+
    function displayAdditionalRuleCondition($condition, $criteria, $name, $value, $test=false) {
-      
+
       if ($test) {
          return false;
       }
@@ -259,30 +259,30 @@ class PluginFusioninventoryRuleImportEquipment extends Rule {
          case PluginFusioninventoryRuleImportEquipment::PATTERN_IS_EMPTY:
             Dropdown::showYesNo($name, 1, 0);
             return true;
-           
+
       }
       return false;
    }
 
-   
+
 
    function displayAdditionalRuleAction($action, $params=array()) {
 
       switch ($action['type']) {
-         
+
          case 'fusion_type':
             Dropdown::showFromArray('value', self::getRuleActionValues());
             break;
 
          default:
             break;
-         
+
       }
       return true;
    }
 
 
-   
+
    function getCriteriaByID($ID) {
       $criteria = array();
       foreach ($this->criterias as $criterion) {
@@ -293,7 +293,7 @@ class PluginFusioninventoryRuleImportEquipment extends Rule {
       return $criteria;
    }
 
-   
+
 
    function findWithGlobalCriteria($input) {
       global $DB, $CFG_GLPI;
@@ -319,7 +319,7 @@ class PluginFusioninventoryRuleImportEquipment extends Rule {
                                  'uuid',
                                  'mskey',
                                  'name',
-                                 'itemtype', 
+                                 'itemtype',
                                  'vmfull');
 
       $nb_crit_find = 0;
@@ -346,7 +346,7 @@ class PluginFusioninventoryRuleImportEquipment extends Rule {
             }
          }
       }
-      
+
       foreach ($this->getCriteriaByID('states_id') as $crit) {
          $complex_criterias[] = $crit;
       }
@@ -356,7 +356,7 @@ class PluginFusioninventoryRuleImportEquipment extends Rule {
 
          return false;
       }
-      
+
       //No complex criteria
       if ((empty($complex_criterias)) OR ($nb_crit_find == 0)) {
          return true;
@@ -385,7 +385,7 @@ class PluginFusioninventoryRuleImportEquipment extends Rule {
               AND (is_array($input['itemtype']))
               AND ($itemtype_global != "0")) {
 
-         $itemtypeselected = $input['itemtype'];      
+         $itemtypeselected = $input['itemtype'];
       } else if (isset($input['itemtype'])
               AND (!empty($input['itemtype']))
               AND ($itemtype_global != "0")) {
@@ -439,7 +439,7 @@ class PluginFusioninventoryRuleImportEquipment extends Rule {
                $sql_where  .= $sql_where_temp;
                $sql_where_networkequipment .= $sql_where_networkequipment_temp;
                break;
-            
+
             case 'ip':
                $sql_where .= " AND `glpi_networkports`.`ip` IN ('";
                $sql_where_networkequipment .= " AND `[typetable]`.`ip` IN ('";
@@ -459,12 +459,12 @@ class PluginFusioninventoryRuleImportEquipment extends Rule {
                        AND $input['itemtype'] == 'Computer'
                        AND isset($_SESSION["plugin_fusioninventory_manufacturerHP"])
                        AND preg_match("/^[sS]/", $input['serial'])) {
-                  
+
                   $serial2 = preg_replace("/^[sS]/", "", $input['serial']);
                   $sql_where_temp = " AND (`[typetable]`.`serial`='".$input["serial"]."'
                      OR `[typetable]`.`serial`='".$serial2."')";
                   $_SESSION["plugin_fusioninventory_serialHP"] = $serial2;
-                  
+
                } else {
                   $sql_where_temp = " AND `[typetable]`.`serial`='".$input["serial"]."'";
                }
@@ -511,7 +511,7 @@ class PluginFusioninventoryRuleImportEquipment extends Rule {
                $sql_where_computer .= ' AND `uuid`="'.$input['uuid'].'"';
                break;
             case 'vmfull':
-               $sql_from .= "INNER JOIN glpi_plugin_fusinvinventory_computers 
+               $sql_from .= "INNER JOIN glpi_plugin_fusinvinventory_computers
                   ON glpi_plugin_fusinvinventory_computers.computers_id = `[typetable]`.id";
                $sql_where_computer .= ' AND `vmfull`="'.$input['vmfull'].'"';
                break;
@@ -544,7 +544,7 @@ class PluginFusioninventoryRuleImportEquipment extends Rule {
          if (isset($_SESSION['plugin_fusioninventory_entityrestrict'])) {
             $sql_where_temp .= " AND `[typetable]`.`entities_id`='".$_SESSION['plugin_fusioninventory_entityrestrict']."'";
          }
-         
+
          $item = new $itemtype();
          $sql_glpi = "SELECT `[typetable]`.`id`
                       FROM $sql_from_temp
@@ -580,7 +580,7 @@ class PluginFusioninventoryRuleImportEquipment extends Rule {
       return false;
    }
 
-   
+
 
    /**
     * Execute the actions as defined in the rule
@@ -598,7 +598,7 @@ class PluginFusioninventoryRuleImportEquipment extends Rule {
          $classname = $_SESSION['plugin_fusioninventory_classrulepassed'];
          $class = new $classname();
       }
-      
+
       $pfRulematchedlog = new PluginFusioninventoryRulematchedlog();
       $inputrulelog = array();
       $inputrulelog['date'] = date('Y-m-d H:i:s');
@@ -609,7 +609,7 @@ class PluginFusioninventoryRuleImportEquipment extends Rule {
       if (isset($_SESSION['plugin_fusioninventory_agents_id'])) {
          $inputrulelog['plugin_fusioninventory_agents_id'] = $_SESSION['plugin_fusioninventory_agents_id'];
       }
-      
+
       PluginFusioninventoryLogger::logIfExtradebug(
          "pluginFusioninventory-rules",
          "execute action\n"
@@ -728,14 +728,14 @@ class PluginFusioninventoryRuleImportEquipment extends Rule {
       return $output;
    }
 
-   
+
 
    function displayCriteriaSelectPattern($name, $ID, $condition, $value="", $test=false) {
 
       $crit    = $this->getCriteria($ID);
       $display = false;
       $tested  = false;
-      
+
       foreach ($this->criterias as $criteria) {
          if ($criteria->fields['criteria'] == $name) {
 
@@ -752,7 +752,7 @@ class PluginFusioninventoryRuleImportEquipment extends Rule {
                                                        'size'  => 70));
                return;
             }
- 
+
             if (($criteria->fields['condition'] == Rule::PATTERN_IS
              || $criteria->fields['condition'] == Rule::PATTERN_IS_NOT)
                     AND ($name != "itemtype" AND $name != 'states_id')) {
@@ -762,18 +762,18 @@ class PluginFusioninventoryRuleImportEquipment extends Rule {
                                                        'value' => $value,
                                                        'size'  => 70));
                return;
-               
+
             }
-         }         
+         }
       }
-      
+
       if (isset($crit['type'])
                  && ($test
                      ||$condition == Rule::PATTERN_IS
                      || $condition == Rule::PATTERN_IS_NOT)) {
 
          switch ($crit['type']) {
-            
+
             case "yesonly":
                Dropdown::showYesNo($name, $value, 0);
                $display = true;
@@ -821,7 +821,7 @@ class PluginFusioninventoryRuleImportEquipment extends Rule {
       }
    }
 
-   
+
 
    function getTypes() {
       global $CFG_GLPI;
@@ -837,7 +837,7 @@ class PluginFusioninventoryRuleImportEquipment extends Rule {
       return $types;
    }
 
-   
+
 
    /**
    * Function used to display type specific criterias during rule's preview
@@ -857,9 +857,9 @@ class PluginFusioninventoryRuleImportEquipment extends Rule {
          echo "<input type='hidden' name='entities_id' value='".$_SESSION["glpiactive_entity"]."'>";
       }
    }
-   
-   
-   
+
+
+
    function preProcessPreviewResults($output) {
       global $LANG;
 
@@ -870,7 +870,7 @@ class PluginFusioninventoryRuleImportEquipment extends Rule {
          echo "<td>";
 
          switch ($output["action"]) {
-            
+
             case self::LINK_RESULT_LINK:
                echo $LANG['setup'][620];
                break;
@@ -882,9 +882,9 @@ class PluginFusioninventoryRuleImportEquipment extends Rule {
             case self::LINK_RESULT_DENIED:
                echo $LANG['plugin_fusioninventory']['codetasklog'][3];
                break;
-            
+
          }
-         
+
          echo "</td>";
          echo "</tr>";
          if ($output["action"] != self::LINK_RESULT_DENIED
@@ -902,5 +902,5 @@ class PluginFusioninventoryRuleImportEquipment extends Rule {
       return $output;
    }
 }
-   
+
 ?>
