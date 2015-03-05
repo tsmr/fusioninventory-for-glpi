@@ -432,7 +432,13 @@ function pluginFusioninventoryUpdate($current_version, $migrationname='Migration
       );
    */
 
-
+   //Push task functionnality
+   $migration->addField('glpi_plugin_fusioninventory_tasks', 'last_agent_wakeup', 'datetime');
+   $migration->addField('glpi_plugin_fusioninventory_tasks', 'wakeup_agent_counter', 'int');
+   $migration->addField('glpi_plugin_fusioninventory_tasks', 'wakeup_agent_time', 'int');
+   $migration->addKey('glpi_plugin_fusioninventory_tasks', 'wakeup_agent_counter');
+   $migration->addKey('glpi_plugin_fusioninventory_tasks', 'wakeup_agent_time');
+   $migration->migrationOneTable('glpi_plugin_fusioninventory_tasks');
    /*
     *  Table glpi_plugin_fusioninventory_agents
     */
@@ -5571,9 +5577,28 @@ function pluginFusioninventoryUpdate($current_version, $migrationname='Migration
     * Update task's agents list from dynamic group periodically in order to automatically target new
     * computer.
     */
-   if (!$crontask->getFromDBbyName('PluginFusioninventoryTaskjob', 'updatedynamictasks')) {
-      CronTask::Register('PluginFusioninventoryTaskjob', 'updatedynamictasks', '60',
+   /*if (!$crontask->getFromDBbyName('PluginFusioninventoryTaskjob', 'updatedynamictasks')) {
+      CronTask::Unregister('PluginFusioninventoryTaskjob', 'updatedynamictasks', '60',
                          array('mode' => 2, 'allowmode' => 3, 'logs_lifetime'=> 30, 'state' => 0));
+
+   }*/
+
+   /*
+    * wake up task's agents list periodically (based on task config)
+    */
+   if (!$crontask->getFromDBbyName('PluginFusioninventoryAgentWakeup', 'wakeupAgents')) {
+      Crontask::Register('PluginFusioninventoryAgentWakeup', 'wakeupAgents', 120,
+                         array('mode'=>2, 'allowmode'=>3, 'logs_lifetime'=>30,
+                               'comment'=>'Wake agents ups'));
+
+      // remove old crontask 
+      $found_crontask = $crontask->find("itemtype = 'PluginFusioninventoryTaskjob' 
+                                         AND name = 'updatedynamictasks'");
+      if (count($found_crontask) > 0) {
+         foreach ($found_crontask as $crontasks_id => $crontask_fields) {
+            $crontask->delete(array('id' => $crontasks_id));
+         }
+      }
    }
 
    /**
