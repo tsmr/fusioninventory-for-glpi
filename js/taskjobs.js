@@ -1,4 +1,4 @@
-var taskjobs = {}
+var taskjobs = {};
 
 taskjobs.show_form = function( data, textStatus, jqXHR) {
    $('#taskjobs_form')
@@ -213,7 +213,11 @@ taskjobs.refresh_pinned_agents = function(chart_id) {
    $.each(chart.pinned_agents, function(agent_id, agent) {
 
       if (agent) {
-         for (i=0; i< agent.length;i++) {
+         var max_iteration = Math.min(agent.length, include_old_jobs);
+         if (max_iteration == -1) {
+            max_iteration = agent.length;
+         }
+         for (i=0; i< max_iteration; i++) {
             if(   i > 0
                   && agent.length > 1
                   && agent[i].jobstate_id == agent[i-1].jobstate_id
@@ -236,7 +240,7 @@ taskjobs.refresh_pinned_agents = function(chart_id) {
 
 
 function unpin_agent(args) {
-   console.debug(arguments);
+   //console.debug(arguments);
    var chart_id = args.chart_id;
    var agent_id = args.data[0];
    delete taskjobs.agents_chart[chart_id].pinned_agents[agent_id];
@@ -273,9 +277,11 @@ function agents_chart(chart_id) {
                   classes.push('pinned');
                }
                var num_classes = d[1].length;
-               for(i=1; i <= num_classes; i++) {
+               /*for(i=1; i <= num_classes; i++) {
                   classes.push('agent_' + d[1][num_classes - i]['state']);
-               }
+               }*/
+
+               classes.push('agent_' + d[1][0]['state']);
                return classes.join(' ');
             }).each( function(d) {
                 //TODO: instead of using d3.selection.each, we should prepare
@@ -338,7 +344,6 @@ function agents_chart(chart_id) {
                 runs
                    .each( function(d) {
                       var rows = [];
-                      console.debug(d);
                          // TODO: replace this with proper templating
                          $.each(d.logs, function(run_id, run) {
                            rows.push(
@@ -1130,7 +1135,8 @@ taskjobs.get_logs = function( ajax_url, task_id ) {
         .toggleClass('computing', false);
 
     var data = {
-        "task_id" : task_id
+        "task_id"         : task_id, 
+        "include_old_jobs": include_old_jobs
     };
 
     $.ajax({
@@ -1145,6 +1151,7 @@ taskjobs.get_logs = function( ajax_url, task_id ) {
         },
         complete: function( ) {
             taskjobs.update_refresh_buttons( ajax_url, task_id);
+            taskjobs.init_include_old_jobs_buttons( ajax_url, task_id);
             taskjobs.Queue.queue("refresh_logs").pop();
             $('.refresh_button')
                 .find('span')
@@ -1164,6 +1171,16 @@ taskjobs.update_refresh_buttons = function( ajax_url, task_id) {
          taskjobs.queue_refresh_logs( ajax_url, task_id )
       });
 
+}
+
+taskjobs.init_include_old_jobs_buttons = function( ajax_url, task_id) {
+   $('.include_old_jobs')
+      .off("click");
+   $('.include_old_jobs')
+      .on('change', function(e) {
+         include_old_jobs = $(this).val();
+         taskjobs.queue_refresh_logs( ajax_url, task_id)
+      });
 }
 
 taskjobs.init_refresh_form = function( ajax_url, task_id, refresh_id) {
