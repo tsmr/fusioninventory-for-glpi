@@ -875,6 +875,7 @@ class PluginFusioninventoryFormatconvert {
                                               'MANUFACTURER' => 'manufacturers_id',
                                               'SERIAL'       => 'serial',
                                               'DESCRIPTION'  => 'comment'));
+            $array_tmp['is_dynamic'] = 1;
             if (!isset($array_tmp['name'])) {
                $array_tmp['name'] = '';
             }
@@ -949,6 +950,7 @@ class PluginFusioninventoryFormatconvert {
                                               'SERIAL'       => 'serial',
                                               'PRODUCTNAME'  => 'productname'));
 
+            $array_tmp['is_dynamic'] = 1;
             if(isset($a_peripherals['VENDORID'])
                      AND $a_peripherals['VENDORID'] != ''
                      AND isset($a_peripherals['PRODUCTID'])) {
