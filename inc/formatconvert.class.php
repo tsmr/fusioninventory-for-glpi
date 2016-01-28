@@ -1550,12 +1550,15 @@ class PluginFusioninventoryFormatconvert {
             }
          }
 
-         $array_tmp = $this->addValues($a_softwares,
-                                        array(
-                                           'PUBLISHER'   => 'manufacturers_id',
-                                           'NAME'        => 'name',
-                                           'VERSION'     => 'version',
-                                           'INSTALLDATE' => 'date_install'));
+         $tmp_soft_values = array('PUBLISHER'   => 'manufacturers_id',
+                                  'NAME'        => 'name',
+                                  'VERSION'     => 'version');
+
+         if (FieldExists('glpi_computers_softwareversions', 'date_install')) {
+            $tmp_soft_values['INSTALLDATE'] = 'date_install';
+         }
+
+         $array_tmp = $this->addValues($a_softwares, $tmp_soft_values);
          if (!isset($array_tmp['name'])
                  || $array_tmp['name'] == '') {
             if (isset($a_softwares['GUID'])
@@ -1623,13 +1626,18 @@ class PluginFusioninventoryFormatconvert {
                   $comp_key = strtolower($array_tmp['name']).
                                "$$$$".strtolower($array_tmp['version']).
                                "$$$$".$array_tmp['manufacturers_id'].
-                               "$$$$".$array_tmp['entities_id'].
-                               "$$$$".$array_tmp['date_install'];
+                               "$$$$".$array_tmp['entities_id'];
+
+                  if (FieldExists('glpi_computers_softwareversions', 'date_install')) {
+                     $comp_key.="$$$$".$array_tmp['date_install'];
+                  }
 
                   $comp_key_simple = strtolower($array_tmp['name']).
                                "$$$$".strtolower($array_tmp['version']).
-                               "$$$$".$array_tmp['entities_id'].
-                               "$$$$".$array_tmp['date_install'];
+                               "$$$$".$array_tmp['entities_id'];
+                  if (FieldExists('glpi_computers_softwareversions', 'date_install')) {
+                     $comp_key_simple.= "$$$$".$array_tmp['date_install'];
+                  }
 
                   if ($array_tmp['manufacturers_id'] == 0) {
                      $softwareWithoutManufacturer[$comp_key_simple] = $array_tmp;

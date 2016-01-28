@@ -847,6 +847,8 @@ class PluginFusioninventoryInventoryComputerLib extends CommonDBTM {
                }
 
             } else {
+               Toolbox::logDebug($a_computerinventory['software']);
+               Toolbox::logDebug($db_software);
                foreach ($a_computerinventory['software'] as $key => $arrayslower) {
                   if (isset($db_software[$key])) {
                      unset($a_computerinventory['software'][$key]);
@@ -2437,7 +2439,9 @@ FALSE);
       $a_software['is_deleted_computer']  = FALSE;
       $a_software['_no_history']          = TRUE;
       $a_software['entities_id']          = $a_software['entities_id'];
-      $a_software['date_install']         = $a_software['date_install'];
+      if (FieldExists('glpi_computers_softwareversions', 'date_install')) {
+         $a_software['date_install']         = $a_software['date_install'];
+      }
 
       if ($this->computer_SoftwareVersion->add($a_software, $options, FALSE)) {
          if (!$no_history) {
