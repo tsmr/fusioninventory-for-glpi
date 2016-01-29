@@ -847,8 +847,6 @@ class PluginFusioninventoryInventoryComputerLib extends CommonDBTM {
                }
 
             } else {
-               Toolbox::logDebug($a_computerinventory['software']);
-               Toolbox::logDebug($db_software);
                foreach ($a_computerinventory['software'] as $key => $arrayslower) {
                   if (isset($db_software[$key])) {
                      unset($a_computerinventory['software'][$key]);
