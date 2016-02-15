@@ -50,13 +50,8 @@ if ((isset($_GET['action'])
 
    include_once("front/communication.php");
 
-//Fusioninventory plugin pages
 } else {
-   Html::header(__('FusionInventory', 'fusioninventory'), $_SERVER["PHP_SELF"], "plugins",
-                "fusioninventory");
-
-   Html::redirect($CFG_GLPI['root_doc']."/plugins/fusioninventory/front/wizard.php");
-   Html::footer();
+   Html::redirect($CFG_GLPI['root_doc']."/plugins/fusioninventory/front/menu.php");
 }
 
 ?>
