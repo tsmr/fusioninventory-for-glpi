@@ -93,6 +93,7 @@ class PluginFusioninventoryCollectRule extends Rule {
                   if ($res != ''
                           && ($action->fields["field"] != 'user'
                               && $action->fields["field"] != 'otherserial'
+                              && $action->fields["field"] != 'contact_num'
                               && $action->fields["field"] != 'software'
                               && $action->fields["field"] != 'softwareversion')) {
                      $res = Dropdown::importExternal(
@@ -192,6 +193,9 @@ class PluginFusioninventoryCollectRule extends Rule {
 
       $actions['otherserial']['name']  = __('Inventory number');
       $actions['otherserial']['force_actions'] = array('assign', 'regex_result');
+
+      $actions['contact_num']['name']  = __('Alternate username number');
+      $actions['contact_num']['force_actions'] = array('assign', 'regex_result');
 
       return $actions;
    }
