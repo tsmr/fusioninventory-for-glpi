@@ -948,10 +948,12 @@ class PluginFusioninventoryInventoryComputerLib extends CommonDBTM {
                             );
                         $tmp = "('".implode("','", $a_tmp);
                         if (FieldExists('glpi_computers_softwareversions', 'date_install')) {
-                           if ($a_software['date_install'] == '') {
-                              $tmp.= "',NULL)";
+                           if (isset($a_software['date_install'])
+                               && !empty($a_software['date_install']
+                               && $date_install = strtotime($a_software['date_install']))) {
+                              $tmp.= "','".date("Y-m-d H:i:s", $date_install)."')";
                            } else {
-                              $tmp.= "','".$a_software['date_install']."')";
+                              $tmp.= "',NULL)";
                            }
                         } else {
                            $tmp = $tmp . "')";
@@ -2415,9 +2417,9 @@ FALSE);
       global $DB;
 
       if (FieldExists('glpi_computers_softwareversions', 'date_install')) {
-         $query = 'INSERT INTO `glpi_computers_softwareversions` (`computers_id`,`softwareversions_id`,`is_dynamic`,`entities_id`,`date_install`) ';
+         $query = 'REPLACE INTO `glpi_computers_softwareversions` (`computers_id`,`softwareversions_id`,`is_dynamic`,`entities_id`,`date_install`) ';
       } else {
-         $query = 'INSERT INTO `glpi_computers_softwareversions` (`computers_id`,`softwareversions_id`,`is_dynamic`,`entities_id`)';
+         $query = 'REPLACE INTO `glpi_computers_softwareversions` (`computers_id`,`softwareversions_id`,`is_dynamic`,`entities_id`)';
       }
       $query .= ' VALUES '.implode(',', $a_input);
       $DB->query($query);
