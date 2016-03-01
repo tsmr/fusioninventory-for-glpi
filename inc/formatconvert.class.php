@@ -1729,6 +1729,10 @@ class PluginFusioninventoryFormatconvert {
       // * Update $a_inventory with $data_collect;
 
       foreach ($data_collect as $data) {
+         // Update contact num
+         if (isset($data['contact_num'])) {
+            $a_inventory['Computer']['contact_num'] = $data['contact_num'];
+         }
          // Update computer model
          if (isset($data['computermodels_id'])) {
             $a_inventory['Computer']['computermodels_id'] = $data['computermodels_id'];
