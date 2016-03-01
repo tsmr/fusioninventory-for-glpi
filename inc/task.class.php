@@ -907,19 +907,23 @@ class PluginFusioninventoryTask extends PluginFusioninventoryTaskView {
             $target_id = $item_type . "_" . $item_id;
             if (isset($targets_cache[$target_id])) {
                $item = $targets_cache[$target_id];
+
             } else {
                $item = new $item_type();
-               $item->getFromDB($item_id);
-               $targets_cache[$target_id] = $item;
+               if($item->getFromDB($item_id)) {
+                  $targets_cache[$target_id] = $item;
+               }
             }
-            $targets_handle[$target_id] = array(
-               'id'        => $item->fields['id'],
-               'name'      => $item->fields['name'],
-               'type_name' => $item->getTypeName(),
-               'item_link' => $item->getLinkUrl(),
-               'counters'  => array(),
-               'agents' => array()
-            );
+            if (isset($item->fields['id'])) {
+               $targets_handle[$target_id] = array(
+                  'id'        => $item->fields['id'],
+                  'name'      => $item->fields['name'],
+                  'type_name' => $item->getTypeName(),
+                  'item_link' => $item->getLinkUrl(),
+                  'counters'  => array(),
+                  'agents' => array()
+               );
+            }
             // create agent states counter lists
             foreach($agent_state_types as $type) {
                $targets_handle[$target_id]['counters'][$type] = array();
