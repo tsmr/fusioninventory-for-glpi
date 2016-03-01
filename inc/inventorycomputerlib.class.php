@@ -812,16 +812,18 @@ class PluginFusioninventoryInventoryComputerLib extends CommonDBTM {
                       );
                   $tmp = "('".implode("','", $a_tmp);
                   if (FieldExists('glpi_computers_softwareversions', 'date_install')) {
-                     if ($a_software['date_install'] == '') {
-                        $tmp.= "',NULL)";
+                     if (!empty($a_software['date_install']
+                         && $date_install = strtotime($a_software['date_install']))) {
+                        $tmp.= "','".date("Y-m-d H:i:s", $date_install)."')";
                      } else {
-                        $tmp.= "','".$a_software['date_install']."')";
+                        $tmp.= "',NULL)";
                      }
                   } else {
                      $tmp = $tmp . "')";
                   }
                   $a_toinsert[] = $tmp;
                }
+
                if (count($a_toinsert) > 0) {
                   $this->addSoftwareVersionsComputer($a_toinsert);
 
