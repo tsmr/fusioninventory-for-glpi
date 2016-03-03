@@ -296,6 +296,31 @@ class PluginFusioninventoryIPRange extends CommonDBTM {
    }
 
 
+   function pre_deleteItem() {
+      $iprange_id = $this->getId();
+      $pfTaskjob  = new PluginFusioninventoryTaskjob;
+      $pfTask     = new PluginFusioninventoryTask;
+      $tasks_link = array();
+
+      $found = $pfTaskjob->find("targets LIKE '%PluginFusioninventoryIPRange\":\"$iprange_id%'");
+      if (count($found)) {
+         foreach($found as $job_withdeleted_iprange) {
+            $pfTask->getFromDB($job_withdeleted_iprange['plugin_fusioninventory_tasks_id']);
+            $tasks_link[] = $pfTask->getLink();
+         }
+
+         $tasks_link = array_unique($tasks_link);
+         Session::addMessageAfterRedirect(
+            __("You can't delete that item, because it is used for one or more items".
+            " : ".implode(', ', $tasks_link)),
+            false, ERROR);
+
+         return false;
+      }
+
+      return true;
+   }
+
 
    function post_deleteItem() {
 

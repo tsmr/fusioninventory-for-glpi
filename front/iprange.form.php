@@ -111,8 +111,11 @@ if (isset ($_POST["add"])) {
    } else {
       Session::checkRight('plugin_fusioninventory_iprange', PURGE);
 
-      $iprange->delete($_POST, 1);
-      Html::redirect(Toolbox::getItemTypeSearchURL('PluginFusioninventoryIPRange'));
+      if ($iprange->delete($_POST, 1)) {
+         Html::redirect(Toolbox::getItemTypeSearchURL('PluginFusioninventoryIPRange'));
+      } else {
+         Html::back();
+      }
    }
 }
 
