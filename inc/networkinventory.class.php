@@ -748,8 +748,10 @@ class PluginFusioninventoryNetworkinventory extends PluginFusioninventoryCommuni
                $entities .= ",$parent";
             }
             $entities .= ")";
-            $query .= " AND `glpi_networkequipments`.`entities_id` IN ".
-                        $entities." ";
+            if ($entities != "()") {
+               $query .= " AND `glpi_networkequipments`.`entities_id` IN ".
+                           $entities." ";
+            }
          }
          $query .= " AND inet_aton(`glpi_ipaddresses`.`name`)
                          BETWEEN inet_aton('".$pfIPRange->fields['ip_start']."')
@@ -763,7 +765,7 @@ class PluginFusioninventoryNetworkinventory extends PluginFusioninventoryCommuni
                );
             }
          }
-      
+
          // Search Printer
         $query = "SELECT `glpi_printers`.`id` AS `gID`,
                          `glpi_ipaddresses`.`name` AS `gnifaddr`,
@@ -788,7 +790,9 @@ class PluginFusioninventoryNetworkinventory extends PluginFusioninventoryCommuni
                $entities .= ",$parent";
             }
             $entities .= ")";
-            $query .= "AND `glpi_printers`.`entities_id` IN ".$entities." ";
+            if ($entities != "()") {
+               $query .= "AND `glpi_printers`.`entities_id` IN ".$entities." ";
+            }
          }
          $query .= " AND inet_aton(`glpi_ipaddresses`.`name`)
                       BETWEEN inet_aton('".$pfIPRange->fields['ip_start']."')
