@@ -253,7 +253,7 @@ class PluginFusioninventoryTask extends PluginFusioninventoryTaskView {
             $actor_key = "".key($actor)."_".$actor[key($actor)];
             if( !isset($actors[$actor_key]) ) {
                $actors[$actor_key] = array();
-               foreach( $this->getAgentsFromActors(array($actor)) as $agent ) {
+               foreach( $this->getAgentsFromActors(array($actor), true) as $agent ) {
                   $actors[$actor_key][$agent] = true;
                }
             }
@@ -424,7 +424,7 @@ class PluginFusioninventoryTask extends PluginFusioninventoryTaskView {
    }
 
 
-   function prepareTaskjobs( $methods = array()) {
+   function prepareTaskjobs( $methods = array(), $tasks_id = false) {
       global $DB;
 
       $agent = new PluginFusioninventoryAgent();
@@ -439,11 +439,17 @@ class PluginFusioninventoryTask extends PluginFusioninventoryTaskView {
          $query_timeslot = '';
       } else {
          $query_timeslot = "OR (`plugin_fusioninventory_timeslots_id` IN (".implode(',', $timeslots)."))";
-      }      
+      }
 
 
       //transform methods array into string for database query
       $methods = "'" . implode("','", $methods) . "'";
+
+      // limit preparation to a specific tasks_id
+      $sql_task_id = "";
+      if ($tasks_id) {
+         $sql_task_id = "AND `task`.`id` = $tasks_id";
+      }
 
       $query = implode( " \n", array(
          "SELECT",
@@ -454,6 +460,7 @@ class PluginFusioninventoryTask extends PluginFusioninventoryTaskView {
          "LEFT JOIN `glpi_plugin_fusioninventory_tasks` task",
          "  ON task.`id` = job.`plugin_fusioninventory_tasks_id`",
          "WHERE task.`is_active` = 1",
+         $sql_task_id,
          "AND (",
          /**
           * Filter jobs by the schedule and timeslots
@@ -652,10 +659,14 @@ class PluginFusioninventoryTask extends PluginFusioninventoryTaskView {
 
    /**
     * Get Computers from Actors defined in taskjobs
+    *
+    * @param $actors : array of actors
+    * @param $use_cache : retrieve agents from cache or not
+    *
     * TODO: this method should be rewritten to call directly a getAgents() method in the
     * corresponding itemtype classes.
     */
-   public function getAgentsFromActors($actors = array()) {
+   public function getAgentsFromActors($actors = array(), $use_cache = false) {
       $agents = array();
       $computers = array();
       $computer = new Computer();
@@ -680,7 +691,7 @@ class PluginFusioninventoryTask extends PluginFusioninventoryTaskView {
 
                $group_targets = $pfToolbox->executeAsFusioninventoryUser(
                   'PluginFusioninventoryDeployGroup::getTargetsForGroup',
-                  array($itemid)
+                  array($itemid, $use_cache)
                );
                foreach( $group_targets as $computerid ) {
                   $computers[$computerid] = 1;
@@ -764,6 +775,23 @@ class PluginFusioninventoryTask extends PluginFusioninventoryTaskView {
       $minutes = intval($interval / 60);
       $hours = intval($interval / 60 / 60);
       return "${hours}h ${minutes}m ${seconds}s ${micro}µs";
+   }
+
+
+   /**
+   * Force running a task
+   *
+   * @param $tasks_id integer id of the task
+   *
+   * @return number uniqid
+   *
+   **/
+   function forceRunning() {
+      $methods = array();
+      foreach( PluginFusioninventoryStaticmisc::getmethods() as $method) {
+         $methods[] = $method['method'];
+      }
+      $this->prepareTaskjobs($methods, $this->getID());
    }
 
 

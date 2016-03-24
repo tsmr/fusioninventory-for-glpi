@@ -127,28 +127,59 @@ class PluginFusioninventoryDeployGroup_Dynamicdata extends CommonDBChild {
    * Get computers belonging to a dynamic group
    * @since 0.85+1.0
    * @param group the group object
+   * @param use_cache retrieve computers_id from cache (computers_id_cache field)
    * @return an array of computer ids
    */
-   static function getTargetsByGroup(PluginFusioninventoryDeployGroup $group) {
-      $search_params = PluginFusioninventoryDeployGroup::getSearchParamsAsAnArray($group, false,true);
-      if (isset($search_params['metacriteria']) && empty($search_params['metacriteria'])) {
-         unset($search_params['metacriteria']);
+   static function getTargetsByGroup(PluginFusioninventoryDeployGroup $group, $use_cache = false) {
+      $ids = array();
+
+      if (!$use_cache || !$ids = self::retrieveCache($group)) {
+         $search_params = PluginFusioninventoryDeployGroup::getSearchParamsAsAnArray($group, false,true);
+         if (isset($search_params['metacriteria']) && empty($search_params['metacriteria'])) {
+            unset($search_params['metacriteria']);
+         }
+
+         //force no sort (Search engine will sort by id) for better performance
+         $search_params['sort'] = '';
+
+         //Only retrieve computers IDs
+         $results = self::getDatas(
+            'PluginFusioninventoryComputer',
+            $search_params,
+            array('2')
+         );
+
+         foreach ($results['data']['rows'] as $id => $row) {
+            $ids[$row['id']] = $row['id'];
+         }
+
+         //store results in cache (for reusing on agent communication)
+         self::storeCache($group, $ids);
       }
 
-      //force no sort (Search engine will sort by id) for better performance 
-      $search_params['sort'] = '';
+      return $ids;
+   }
 
-      //Only retrieve computers IDs
-      $results = self::getDatas(
-         'PluginFusioninventoryComputer',
-         $search_params,
-         array('2')
-      );
+   static function storeCache(PluginFusioninventoryDeployGroup $group, $ids) {
+      global $DB;
 
-      $ids     = array();
-      foreach ($results['data']['rows'] as $id => $row) {
-         $ids[$row['id']] = $row['id'];
+      $query = "UPDATE ".self::getTable()."
+                SET `computers_id_cache` = '".$DB->escape(json_encode($ids))."'
+                WHERE `plugin_fusioninventory_deploygroups_id` = '".$group->getID()."'";
+      return $DB->query($query);
+   }
+
+   static function retrieveCache(PluginFusioninventoryDeployGroup $group) {
+      global $DB;
+
+      $ids  = false;
+      $data = getAllDatasFromTable(self::getTable(),
+                                   "`plugin_fusioninventory_deploygroups_id` = '".$group->getID()."'");
+      if (count($data)) {
+         $first = array_shift($data);
+         $ids   = json_decode($first['computers_id_cache'], true);
       }
+
       return $ids;
    }
 
