@@ -5665,6 +5665,14 @@ function pluginFusioninventoryUpdate($current_version, $migrationname='Migration
       $migration->migrationOneTable('glpi_plugin_fusioninventory_deploygroups_dynamicdatas');
    }
 
+   /**
+   * Add field to cache computers_id found from search engine
+   */
+   if (!FieldExists('glpi_plugin_fusioninventory_deploygroups_dynamicdatas', 'computers_id_cache')) {
+      $migration->addField('glpi_plugin_fusioninventory_deploygroups_dynamicdatas', 'computers_id_cache', 'text');
+      $migration->migrationOneTable('glpi_plugin_fusioninventory_deploygroups_dynamicdatas');
+   }
+
 
 //   $pfIgnoredimportdevice = new PluginFusioninventoryIgnoredimportdevice();
 //   $pfIgnoredimportdevice->install();

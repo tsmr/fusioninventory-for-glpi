@@ -374,7 +374,7 @@ class PluginFusioninventoryDeployGroup extends CommonDBTM {
       echo Html::scriptBlock($clean_script);*/
    }
 
-   static function getTargetsForGroup($groups_id) {
+   static function getTargetsForGroup($groups_id, $use_cache = false) {
       $group = new self();
       $group->getFromDB($groups_id);
 
@@ -386,7 +386,8 @@ class PluginFusioninventoryDeployGroup extends CommonDBTM {
             $results[$tmpgroup['items_id']] = $tmpgroup['items_id'];
          }
       } else {
-         $results = PluginFusioninventoryDeployGroup_Dynamicdata::getTargetsByGroup($group);
+         $results = PluginFusioninventoryDeployGroup_Dynamicdata::getTargetsByGroup($group,
+                                                                                    $use_cache);
       }
       return $results;
    }
