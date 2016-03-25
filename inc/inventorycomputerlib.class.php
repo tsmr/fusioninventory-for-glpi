@@ -694,7 +694,7 @@ class PluginFusioninventoryInventoryComputerLib extends CommonDBTM {
                if (FieldExists('glpi_computers_softwareversions', 'date_install')) {
                   $dateInstallField = ",`glpi_computers_softwareversions`.`date_install`";
                } else {
-                  $dateInstallField = '';
+                  $dateInstallField = ",'' as `date_install`";
                }
                $query = "SELECT `glpi_computers_softwareversions`.`id` as sid,
                           `glpi_softwares`.`name`,
@@ -726,7 +726,7 @@ class PluginFusioninventoryInventoryComputerLib extends CommonDBTM {
                                "$$$$".strtolower($data['version']).
                                "$$$$".$data['manufacturers_id'].
                                "$$$$".$data['entities_id'].
-                               (isset($data['date_install']) ? "$$$$".$data['date_install'] : '');
+                               "$$$$".$data['date_install'];
                   $db_software[$comp_key] = $idtmp;
                }
             }
