@@ -3,7 +3,7 @@
 /*
    ------------------------------------------------------------------------
    FusionInventory
-   Copyright (C) 2010-2015 by the FusionInventory Development Team.
+   Copyright (C) 2010-2016 by the FusionInventory Development Team.
 
    http://www.fusioninventory.org/   http://forge.fusioninventory.org/
    ------------------------------------------------------------------------
@@ -30,7 +30,7 @@
    @package   FusionInventory
    @author    David Durieux
    @co-author
-   @copyright Copyright (c) 2010-2015 FusionInventory team
+   @copyright Copyright (c) 2010-2016 FusionInventory team
    @license   AGPL License 3.0 or (at your option) any later version
               http://www.gnu.org/licenses/agpl-3.0-standalone.html
    @link      http://www.fusioninventory.org/
@@ -40,7 +40,7 @@
    ------------------------------------------------------------------------
  */
 
-define ("PLUGIN_FUSIONINVENTORY_VERSION", "0.90+1.0+TECLIB_17");
+define ("PLUGIN_FUSIONINVENTORY_VERSION", "0.90+1.2+TECLIB_18");
 
 // Used for use config values in 'cache'
 $PF_CONFIG = array();
@@ -48,9 +48,8 @@ $PF_CONFIG = array();
 $PF_ESXINVENTORY = FALSE;
 
 define ("PLUGIN_FUSIONINVENTORY_XML", '');
-
 define ("PLUGIN_FUSIONINVENTORY_OFFICIAL_RELEASE", "1");
-define ("PLUGIN_FUSIONINVENTORY_REALVERSION", "0.90+1.0 SNAPSHOT");
+define ("PLUGIN_FUSIONINVENTORY_REALVERSION", "0.90+1.2 SNAPSHOT");
 include_once(GLPI_ROOT."/inc/includes.php");
 
 include_once( GLPI_ROOT . "/plugins/fusioninventory/lib/autoload.php");
@@ -381,9 +380,9 @@ function plugin_init_fusioninventory() {
 
          }
          if (Session::haveRight('plugin_fusioninventory_reportnetworkequipment', READ)) {
-            $report_list["report/switch_ports.history.php"] = __('Switchs ports history', 'fusioninventory');
+            $report_list["report/switch_ports.history.php"] = __('Switch ports history', 'fusioninventory');
 
-            $report_list["report/ports_date_connections.php"] = __('Unused switchs ports', 'fusioninventory');
+            $report_list["report/ports_date_connections.php"] = __('Unused switch ports', 'fusioninventory');
 
             $report_list["report/not_queried_recently.php"] = __('Number of days since last inventory', 'fusioninventory');
 
@@ -469,7 +468,7 @@ function plugin_init_fusioninventory() {
    $CFG_GLPI["netport_types"][] = "PluginFusioninventoryUnmanaged";
 
    // exclude some pages from splitted layout
-   if (isset($CFG_GLPI['layout_excluded_pages'])) {
+   if (isset($CFG_GLPI['layout_excluded_pages'])) { // to be compatible with glpi 0.85
       array_push($CFG_GLPI['layout_excluded_pages'], "timeslot.form.php");
    }
 }

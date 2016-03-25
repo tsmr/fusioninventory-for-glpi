@@ -3,7 +3,7 @@
 /*
    ------------------------------------------------------------------------
    FusionInventory
-   Copyright (C) 2010-2015 by the FusionInventory Development Team.
+   Copyright (C) 2010-2016 by the FusionInventory Development Team.
 
    http://www.fusioninventory.org/   http://forge.fusioninventory.org/
    ------------------------------------------------------------------------
@@ -30,7 +30,7 @@
    @package   FusionInventory
    @author    David Durieux
    @co-author
-   @copyright Copyright (c) 2010-2015 FusionInventory team
+   @copyright Copyright (c) 2010-2016 FusionInventory team
    @license   AGPL License 3.0 or (at your option) any later version
               http://www.gnu.org/licenses/agpl-3.0-standalone.html
    @link      http://www.fusioninventory.org/
@@ -476,7 +476,6 @@ class PluginFusioninventoryTaskjob extends  PluginFusioninventoryTaskjobView {
       asort($array);
       return $array;
    }
-
 
 
    /**
@@ -1338,8 +1337,8 @@ class PluginFusioninventoryTaskjob extends  PluginFusioninventoryTaskjobView {
          $pfTaskjob->getFromDB($data['id']);
          echo "<tr class='tab_bg_1'>";
          echo "<td>";
-         Html::showCheckbox(array('name'    => 'taskjobstoforcerun[]', 
-                                  'value'   => $data['id'], 
+         Html::showCheckbox(array('name'    => 'taskjobstoforcerun[]',
+                                  'value'   => $data['id'],
                                   'checked' => true));
          echo "</td>";
          $link_item = $pfTaskjob->getFormURL();
@@ -1352,7 +1351,7 @@ class PluginFusioninventoryTaskjob extends  PluginFusioninventoryTaskjobView {
             $pfTaskjob->getFromDB($data['id']);
             echo "<tr class='tab_bg_1'>";
             echo "<td>";
-            Html::showCheckbox(array('name'    => 'taskjobstoforcerun[]', 
+            Html::showCheckbox(array('name'    => 'taskjobstoforcerun[]',
                                      'value'   => $data['id']));
             echo "</td>";
             $link_item = $pfTaskjob->getFormURL();
@@ -1708,7 +1707,7 @@ function new_subtype(id) {
       foreach ($a_taskjobs as $data) {
          echo Search::showNewLine(Search::HTML_OUTPUT, ($i%2));
          echo "<td class='control'>";
-         Html::showCheckbox(array('name'    => 'taskjob_entries[]', 
+         Html::showCheckbox(array('name'    => 'taskjob_entries[]',
                                   'value'   => $i));
          echo "</td>";
          echo "<td>";

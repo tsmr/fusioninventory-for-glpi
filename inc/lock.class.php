@@ -3,7 +3,7 @@
 /*
    ------------------------------------------------------------------------
    FusionInventory
-   Copyright (C) 2010-2015 by the FusionInventory Development Team.
+   Copyright (C) 2010-2016 by the FusionInventory Development Team.
 
    http://www.fusioninventory.org/   http://forge.fusioninventory.org/
    ------------------------------------------------------------------------
@@ -30,7 +30,7 @@
    @package   FusionInventory
    @author    Vincent Mazzoni
    @co-author David Durieux
-   @copyright Copyright (c) 2010-2015 FusionInventory team
+   @copyright Copyright (c) 2010-2016 FusionInventory team
    @license   AGPL License 3.0 or (at your option) any later version
               http://www.gnu.org/licenses/agpl-3.0-standalone.html
    @link      http://www.fusioninventory.org/
@@ -693,6 +693,7 @@ class PluginFusioninventoryLock extends CommonDBTM{
       $exclude[] = "entities_id";
       $exclude[] = "is_recursive";
       $exclude[] = "date_mod";
+      $exclude[] = "date_creation";
       $exclude[] = "is_deleted";
       $exclude[] = "is_dynamic";
       $exclude[] = "is_template";
@@ -917,6 +918,10 @@ class PluginFusioninventoryLock extends CommonDBTM{
             }
             break;
       }
+   }
+
+   static function isFieldLocked($a_lockable, $field) {
+      return in_array($field, $a_lockable);
    }
 }
 
