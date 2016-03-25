@@ -413,7 +413,7 @@ class PluginFusioninventoryNetworkEquipment extends CommonDBTM {
    }
 
 
-   function update_network_infos($id, $plugin_fusinvsnmp_configsecurities_id, $sysdescr) {
+   function update_network_infos($id, configsecurities_id, $sysdescr) {
       global $DB;
 
       $query = "SELECT *
