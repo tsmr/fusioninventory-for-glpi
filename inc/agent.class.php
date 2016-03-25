@@ -399,7 +399,7 @@ class PluginFusioninventoryAgent extends CommonDBTM {
                $CFG_GLPI['root_doc']."/plugins/fusioninventory/front/agent.form.php\", ".
                "{\"update\": \"update\",
                  \"computers_id\": 0,
-                 \"id\": ".$this->fields['id'].", 
+                 \"id\": ".$this->fields['id'].",
                  \"_glpi_csrf_token\": \"".Session::getNewCSRFToken()."\"});'>".
                "<img src='".$CFG_GLPI['root_doc']."/pics/delete.png' /></a>";
       } else {
@@ -1223,6 +1223,16 @@ class PluginFusioninventoryAgent extends CommonDBTM {
          echo '<td>'.__('FusionInventory tag', 'fusioninventory').'</td>';
          echo '<td>'.$this->fields['tag'].'</td>';
          echo '</tr>';
+
+         echo '<tr class="tab_bg_1">';
+         echo '<td>';
+         echo __('Last contact', 'fusioninventory');
+         echo '</td>';
+         echo '<td>';
+         echo Html::convDateTime($this->fields['last_contact']);
+         echo '</td>';
+         echo '</tr>';
+
       }
    }
 

@@ -341,6 +341,13 @@ function plugin_fusioninventory_getAddSearchOptions($itemtype) {
         $sopt[5369]['joinparams']  = array('jointype' => 'child');
         $sopt[5369]['massiveaction'] = FALSE;
 
+
+        $sopt[5172]['table']         = 'glpi_plugin_fusioninventory_agents';
+        $sopt[5172]['field']         = 'last_contact';
+        $sopt[5172]['linkfield']     = '';
+        $sopt[5172]['joinparams']    = array('jointype' => 'child');
+        $sopt[5172]['name']          = __('Last contact', 'fusioninventory');
+
    }
 
    if ($itemtype == 'Entity') {
