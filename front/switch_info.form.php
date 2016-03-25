@@ -3,7 +3,7 @@
 /*
    ------------------------------------------------------------------------
    FusionInventory
-   Copyright (C) 2010-2015 by the FusionInventory Development Team.
+   Copyright (C) 2010-2016 by the FusionInventory Development Team.
 
    http://www.fusioninventory.org/   http://forge.fusioninventory.org/
    ------------------------------------------------------------------------
@@ -30,7 +30,7 @@
    @package   FusionInventory
    @author    David Durieux
    @co-author
-   @copyright Copyright (c) 2010-2015 FusionInventory team
+   @copyright Copyright (c) 2010-2016 FusionInventory team
    @license   AGPL License 3.0 or (at your option) any later version
               http://www.gnu.org/licenses/agpl-3.0-standalone.html
    @link      http://www.fusioninventory.org/
@@ -47,8 +47,8 @@ Session::checkRight('plugin_fusioninventory_networkequipment', UPDATE);
 
 if ((isset($_POST['update'])) && (isset($_POST['id']))) {
    $pfNetworkEquipment = new PluginFusioninventoryNetworkEquipment();
-   $pfNetworkEquipment->update_network_infos($_POST['id'], 
-                                             $_POST['plugin_fusioninventory_configsecurities_id'], 
+   $pfNetworkEquipment->update_network_infos($_POST['id'],
+                                             $_POST['plugin_fusioninventory_configsecurities_id'],
                                              $_POST['sysdescr']);
 }
 

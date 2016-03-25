@@ -3,7 +3,7 @@
 /*
    ------------------------------------------------------------------------
    FusionInventory
-   Copyright (C) 2010-2015 by the FusionInventory Development Team.
+   Copyright (C) 2010-2016 by the FusionInventory Development Team.
 
    http://www.fusioninventory.org/   http://forge.fusioninventory.org/
    ------------------------------------------------------------------------
@@ -30,7 +30,7 @@
    @package   FusionInventory
    @author    David Durieux
    @co-author
-   @copyright Copyright (c) 2010-2015 FusionInventory team
+   @copyright Copyright (c) 2010-2016 FusionInventory team
    @license   AGPL License 3.0 or (at your option) any later version
               http://www.gnu.org/licenses/agpl-3.0-standalone.html
    @link      http://www.fusioninventory.org/
@@ -1123,16 +1123,16 @@ function plugin_fusioninventory_addSelect($type, $id, $num) {
          break;
 
       case 'Computer':
-         $a_agent_modules = PluginFusioninventoryAgentmodule::getModules();       
-         foreach ($a_agent_modules as $module) {      
-            if ($table.".".$field ==      
-                    'glpi_plugin_fusioninventory_agentmodules.'.$module) {       
-      
-               return " `FUSION_".$module."`.`is_active` AS ITEM_$num, ".     
-                          "`FUSION_".$module."`.`exceptions`  AS ITEM_".$num."_0, ".      
-                          "`agent".strtolower($module)."`.`id`  AS ITEM_".$num."_1, ";       
-            }     
-         }     
+         $a_agent_modules = PluginFusioninventoryAgentmodule::getModules();
+         foreach ($a_agent_modules as $module) {
+            if ($table.".".$field ==
+                    'glpi_plugin_fusioninventory_agentmodules.'.$module) {
+
+               return " `FUSION_".$module."`.`is_active` AS ITEM_$num, ".
+                          "`FUSION_".$module."`.`exceptions`  AS ITEM_".$num."_0, ".
+                          "`agent".strtolower($module)."`.`id`  AS ITEM_".$num."_1, ";
+            }
+         }
          break;
 
       case 'PluginFusioninventoryUnmanaged' :
@@ -1820,8 +1820,32 @@ function plugin_fusioninventory_registerMethods() {
    $WEBSERVICES_METHOD['fusioninventory.computerextendedinfo'] = array(
        'PluginFusioninventoryInventoryComputerWebservice',
 		 'methodExtendedInfo');
+}
 
 
+// Define dropdown relations
+function plugin_fusioninventory_getDatabaseRelations() {
+
+   $plugin = new Plugin();
+
+   if ($plugin->isActivated("fusioninventory")) {
+      return array("glpi_entities"
+                        => array("glpi_plugin_fusioninventory_agents"               => "entities_id",
+                                 "glpi_plugin_fusioninventory_collects"             => "entities_id",
+                                 "glpi_plugin_fusioninventory_credentialips"        => "entities_id",
+                                 "glpi_plugin_fusioninventory_credentials"          => "entities_id",
+                                 "glpi_plugin_fusioninventory_deployfiles"          => "entities_id",
+                                 "glpi_plugin_fusioninventory_deploymirrors"        => "entities_id",
+                                 "glpi_plugin_fusioninventory_deploypackages"       => "entities_id",
+                                 "glpi_plugin_fusioninventory_ignoredimportdevices" => "entities_id",
+                                 "glpi_plugin_fusioninventory_ipranges"             => "entities_id",
+                                 "glpi_plugin_fusioninventory_tasks"                => "entities_id",
+                                 "glpi_plugin_fusioninventory_timeslotentries"      => "entities_id",
+                                 "glpi_plugin_fusioninventory_timeslots"            => "entities_id",
+                                 "glpi_plugin_fusioninventory_unmanageds"           => "entities_id"));
+
+   }
+   return array();
 }
 
 ?>

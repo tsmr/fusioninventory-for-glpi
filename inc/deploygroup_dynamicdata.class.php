@@ -3,7 +3,7 @@
 /*
    ------------------------------------------------------------------------
    FusionInventory
-   Copyright (C) 2010-2015 by the FusionInventory Development Team.
+   Copyright (C) 2010-2016 by the FusionInventory Development Team.
 
    http://www.fusioninventory.org/   http://forge.fusioninventory.org/
    ------------------------------------------------------------------------
@@ -30,7 +30,7 @@
    @package   FusionInventory
    @author    Alexandre Delaunay
    @co-author
-   @copyright Copyright (c) 2010-2015 FusionInventory team
+   @copyright Copyright (c) 2010-2016 FusionInventory team
    @license   AGPL License 3.0 or (at your option) any later version
               http://www.gnu.org/licenses/agpl-3.0-standalone.html
    @link      http://www.fusioninventory.org/
@@ -68,6 +68,7 @@ class PluginFusioninventoryDeployGroup_Dynamicdata extends CommonDBChild {
    **/
    static function displayTabContentForItem(CommonGLPI $item, $tabnum=1, $withtemplate=0) {
       switch ($tabnum) {
+
          case 0:
             $search_params = PluginFusioninventoryDeployGroup::getSearchParamsAsAnArray($item, false);
             if (isset($search_params['metacriteria']) && empty($search_params['metacriteria'])) {
@@ -75,23 +76,36 @@ class PluginFusioninventoryDeployGroup_Dynamicdata extends CommonDBChild {
             }
             PluginFusioninventoryDeployGroup::showCriteria($item, true, $search_params);
             break;
+
          case 1:
+            $params_dyn = array();
+            foreach (array('sort', 'order', 'start') as $field) {
+               if (isset($_SESSION['glpisearch']['PluginFusioninventoryComputer'][$field])) {
+                  $params_dyn[$field] = $_SESSION['glpisearch']['PluginFusioninventoryComputer'][$field];
+               }
+            }
             $params = PluginFusioninventoryDeployGroup::getSearchParamsAsAnArray($item, false);
             $params['massiveactionparams']['extraparams']['id'] = $_GET['id'];
-            foreach (array('sort', 'order', 'start') as $field) {
-               if (isset($_GET[$field])) {
-                  $params[$field] = $_GET[$field];
-               }
+
+            // foreach (array('sort', 'order', 'start') as $field) {
+            //    if (isset($_GET[$field])) {
+            //       $params[$field] = $_GET[$field];
+            //    }
+            // }
+
+            foreach ($params_dyn as $key => $value) {
+               $params[$key] = $value;
             }
 
             if (isset($params['metacriteria']) && !is_array($params['metacriteria'])) {
                $params['metacriteria'] = array();
             }
-            
+
             $params['target'] = Toolbox::getItemTypeFormURL("PluginFusioninventoryDeployGroup" , true).
                                 "?id=".$item->getID();
             self::showList('PluginFusioninventoryComputer', $params, array('2', '1'));
             break;
+
       }
 
       return true;
@@ -103,6 +117,8 @@ class PluginFusioninventoryDeployGroup_Dynamicdata extends CommonDBChild {
       $_GET['_in_modal'] = true;
       $data = Search::prepareDatasForSearch($itemtype, $params, $forcedisplay);
       Search::constructSQL($data);
+      $data['sql']['search'] = str_replace("`mainitemtype` = 'PluginFusioninventoryComputer'",
+              "`mainitemtype` = 'Computer'", $data['sql']['search']);
       Search::constructDatas($data);
       if (Session::isMultiEntitiesMode()) {
          $data['data']['cols'] = array_slice($data['data']['cols'], 0, 2);

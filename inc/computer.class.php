@@ -3,7 +3,7 @@
 /*
    ------------------------------------------------------------------------
    FusionInventory
-   Copyright (C) 2010-2015 by the FusionInventory Development Team.
+   Copyright (C) 2010-2016 by the FusionInventory Development Team.
 
    http://www.fusioninventory.org/   http://forge.fusioninventory.org/
    ------------------------------------------------------------------------
@@ -30,7 +30,7 @@
    @package   FusionInventory
    @author    David Durieux
    @co-author
-   @copyright Copyright (c) 2010-2015 FusionInventory team
+   @copyright Copyright (c) 2010-2016 FusionInventory team
    @license   AGPL License 3.0 or (at your option) any later version
               http://www.gnu.org/licenses/agpl-3.0-standalone.html
    @link      http://www.fusioninventory.org/
@@ -56,6 +56,8 @@ class PluginFusioninventoryComputer extends Computer {
    function getSearchOptions() {
       $computer = new Computer();
       $options  = $computer->getSearchOptions();
+
+      $options += NetworkPort::getSearchOptionsToAdd('Computer');
 
       $options['6000']['name']          = __('Static group', 'fusioninventory');
       $options['6000']['table']         = getTableForItemType('PluginFusioninventoryDeployGroup');

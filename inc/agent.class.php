@@ -3,7 +3,7 @@
 /*
    ------------------------------------------------------------------------
    FusionInventory
-   Copyright (C) 2010-2015 by the FusionInventory Development Team.
+   Copyright (C) 2010-2016 by the FusionInventory Development Team.
 
    http://www.fusioninventory.org/   http://forge.fusioninventory.org/
    ------------------------------------------------------------------------
@@ -30,7 +30,7 @@
    @package   FusionInventory
    @author    David Durieux
    @co-author
-   @copyright Copyright (c) 2010-2015 FusionInventory team
+   @copyright Copyright (c) 2010-2016 FusionInventory team
    @license   AGPL License 3.0 or (at your option) any later version
               http://www.gnu.org/licenses/agpl-3.0-standalone.html
    @link      http://www.fusioninventory.org/
@@ -1235,7 +1235,7 @@ class PluginFusioninventoryAgent extends CommonDBTM {
    * @return bool cron is ok or not
    *
    **/
-   static function cronCleanoldagents() {
+   static function cronCleanoldagents($task=NULL) {
       global $DB;
 
       $pfConfig = new PluginFusioninventoryConfig();
@@ -1246,15 +1246,36 @@ class PluginFusioninventoryAgent extends CommonDBTM {
          return TRUE;
       }
       $sql = "SELECT * FROM `glpi_plugin_fusioninventory_agents`
-                WHERE `last_contact` < date_add(now(), interval -".$retentiontime." day)";
-      $result=$DB->query($sql);
+                   WHERE `last_contact` < date_add(now(), interval -".$retentiontime." day)";
+      $result = $DB->query($sql);
+
       if ($result) {
-         while ($data=$DB->fetch_array($result)) {
-            $pfAgent->delete($data);
+         $cron_status = FALSE;
+         $action = $pfConfig->getValue('agents_action');
+         if ($action == PluginFusioninventoryConfig::ACTION_CLEAN) {
+            //delete agents
+            while ($data = $DB->fetch_array($result)) {
+               $pfAgent->delete($data);
+               $task->addVolume(1);
+               $cron_status = TRUE;
+            }
+         } else {
+            //change status of agents
+            while ($data = $DB->fetch_array($result)) {
+               $computer = new Computer();
+               if($computer->getFromDB($data['computers_id'])){
+                  $computer->update(array(
+                      'id' => $data['computers_id'],
+                      'states_id' => $pfConfig->getValue('agents_status')));
+                  $task->addVolume(1);
+                  $cron_status = TRUE;
+               }
+            }
          }
       }
-      return TRUE;
+      return $cron_status;
    }
+
 }
 
 ?>

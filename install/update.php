@@ -3,7 +3,7 @@
 /*
    ------------------------------------------------------------------------
    FusionInventory
-   Copyright (C) 2010-2015 by the FusionInventory Development Team.
+   Copyright (C) 2010-2016 by the FusionInventory Development Team.
 
    http://www.fusioninventory.org/   http://forge.fusioninventory.org/
    ------------------------------------------------------------------------
@@ -30,7 +30,7 @@
    @package   FusionInventory
    @author    David Durieux
    @co-author
-   @copyright Copyright (c) 2010-2015 FusionInventory team
+   @copyright Copyright (c) 2010-2016 FusionInventory team
    @license   AGPL License 3.0 or (at your option) any later version
               http://www.gnu.org/licenses/agpl-3.0-standalone.html
    @link      http://www.fusioninventory.org/
@@ -4852,6 +4852,24 @@ function pluginFusioninventoryUpdate($current_version, $migrationname='Migration
 
 
    /*
+    *  Clean SNMP communities orphelin associated to deleted ipranges
+    */
+   $query_select = "SELECT `glpi_plugin_fusioninventory_ipranges_configsecurities`.`id`
+                    FROM `glpi_plugin_fusioninventory_ipranges_configsecurities`
+                          LEFT JOIN `glpi_plugin_fusioninventory_ipranges`
+                          ON `glpi_plugin_fusioninventory_ipranges`.`id` = `plugin_fusioninventory_ipranges_id`
+                    WHERE `glpi_plugin_fusioninventory_ipranges`.`id` IS NULL";
+   $result=$DB->query($query_select);
+   while ($data=$DB->fetch_array($result)) {
+      $query_del = "DELETE FROM `glpi_plugin_fusioninventory_ipranges_configsecurities`
+         WHERE `id`='".$data["id"]."'";
+      $DB->query($query_del);
+   }
+
+
+
+
+   /*
     * Fix problem with mapping with many entries with same mapping
     */
    $a_mapping = array();
@@ -5447,6 +5465,8 @@ function pluginFusioninventoryUpdate($current_version, $migrationname='Migration
       $a_input['extradebug'] = 0;
       $a_input['users_id'] = $users_id;
       $a_input['agents_old_days'] = 0;
+      $a_input['agents_action'] = 0;
+      $a_input['agents_status'] = 0;
       $config->addValues($a_input, FALSE);
 //      $DB->query("DELETE FROM `glpi_plugin_fusioninventory_configs`
 //        WHERE `plugins_id`='0'");
@@ -5637,6 +5657,9 @@ function pluginFusioninventoryUpdate($current_version, $migrationname='Migration
    if ($crontask->getFromDBbyName('PluginFusioninventoryConfigurationManagement', 'checkdevices')) {
       $crontask->delete($crontask->fields);
    }
+   if ($crontask->getFromDBbyName('PluginFusioninventoryTaskjob', 'updatedynamictasks')) {
+      $crontask->delete($crontask->fields);
+   }
    if (!$crontask->getFromDBbyName('PluginFusioninventoryAgent', 'cleanoldagents')) {
       Crontask::Register('PluginFusioninventoryAgent', 'cleanoldagents', 86400,
                          array('mode'=>2, 'allowmode'=>3, 'logs_lifetime'=>30,
@@ -5650,6 +5673,10 @@ function pluginFusioninventoryUpdate($current_version, $migrationname='Migration
                                              AND name = 'updatedynamictasks'");
    }
 
+   /*
+    * Update task's agents list from dynamic group periodically in order to automatically target new
+    * computer.
+    */
    if (!$crontask->getFromDBbyName('PluginFusioninventoryAgentWakeup', 'wakeupAgents')) {
       Crontask::Register('PluginFusioninventoryAgentWakeup', 'wakeupAgents', 120,
                          array('mode'=>2, 'allowmode'=>3, 'logs_lifetime'=>30,

@@ -3,7 +3,7 @@
 /*
    ------------------------------------------------------------------------
    FusionInventory
-   Copyright (C) 2010-2015 by the FusionInventory Development Team.
+   Copyright (C) 2010-2016 by the FusionInventory Development Team.
 
    http://www.fusioninventory.org/   http://forge.fusioninventory.org/
    ------------------------------------------------------------------------
@@ -30,7 +30,7 @@
    @package   FusionInventory
    @author    David Durieux
    @co-author Alexandre Delaunay
-   @copyright Copyright (c) 2010-2015 FusionInventory team
+   @copyright Copyright (c) 2010-2016 FusionInventory team
    @license   AGPL License 3.0 or (at your option) any later version
               http://www.gnu.org/licenses/agpl-3.0-standalone.html
    @link      http://www.fusioninventory.org/
@@ -182,39 +182,20 @@ class PluginFusioninventoryDeployPackage extends CommonDBTM {
                ).
             "</h4>\n";
 
+         foreach ($this->running_tasks as $task) {
 
-         $taskurl_list_names = implode(', ',
-            array_map(
-               create_function('$task', 'return "\"".$task["task"]["name"]."\"";'),
-               $this->running_tasks
-            )
-         );
+            $taskurl_base =
+               Toolbox::getItemTypeFormURL("PluginFusioninventoryTask", TRUE);
 
-
-         /**
-         * WARNING:
-         * The following may be considered as a hack until we get
-         * the Search class splitted to get a SearchUrl correctly
-         * (cf. https://forge.indepnet.net/issues/2476)
-         **/
-         $taskurl_base =
-            Toolbox::getItemTypeSearchURL("PluginFusioninventoryTaskJob", TRUE);
-
-         $taskurl_args = implode("&",
-            array(
-               urlencode("field[0]"). "=4",
-               urlencode("searchtype[0]") ."=contains",
-               urlencode("contains[0]")."= ". urlencode('['.$taskurl_list_names.']'),
-               "itemtype=PluginFusioninventoryTask",
-               "start=0"
-            )
-         );
-         $error_message .= "<a href='$taskurl_base?$taskurl_args'>";
-         $error_message .=  $taskurl_list_names;
-         $error_message .= "</a>";
+            $error_message .= "<a href='$taskurl_base?id=".$task['task']['id']."'>";
+            $error_message .=  $task['task']['name'];
+            $error_message .= "</a>, ";
+         }
       }
       return $error_message;
    }
+
+
 
    //mmmh I'm not sure if it's still used ... -- kiniou
    function post_addItem() {

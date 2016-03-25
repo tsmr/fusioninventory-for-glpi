@@ -3,7 +3,7 @@
 /*
    ------------------------------------------------------------------------
    FusionInventory
-   Copyright (C) 2010-2015 by the FusionInventory Development Team.
+   Copyright (C) 2010-2016 by the FusionInventory Development Team.
 
    http://www.fusioninventory.org/   http://forge.fusioninventory.org/
    ------------------------------------------------------------------------
@@ -30,7 +30,7 @@
    @package   FusionInventory
    @author    Walid Nouh
    @co-author
-   @copyright Copyright (c) 2010-2015 FusionInventory team
+   @copyright Copyright (c) 2010-2016 FusionInventory team
    @license   AGPL License 3.0 or (at your option) any later version
               http://www.gnu.org/licenses/agpl-3.0-standalone.html
    @link      http://www.fusioninventory.org/
@@ -67,7 +67,7 @@ class PluginFusioninventoryAgentWakeup extends  CommonDBTM {
    }
 
    /*
-    * @function cronUpdateDynamicTasks
+    * @function cronWakeupAgents
     * This function update already running tasks with dynamic groups
     */
    static function cronWakeupAgents($crontask) {
@@ -76,13 +76,13 @@ class PluginFusioninventoryAgentWakeup extends  CommonDBTM {
 
       $wakeupArray = array();
       $tasks       = array();
-      //Get the maximum number of agent to wakeup, 
+      //Get the maximum number of agent to wakeup,
       //as allowed in the general configuration
       $config      = new PluginFusioninventoryConfig();
       $maxWakeUp   = $config->getValue('wakeup_agent_max');
       $counter     = 0;
       $continue    = true;
-      
+
       //Get all active timeslots
       $timeslot = new PluginFusioninventoryTimeslot();
       $timeslots = $timeslot->getCurrentActiveTimeslots();
@@ -92,12 +92,12 @@ class PluginFusioninventoryAgentWakeup extends  CommonDBTM {
          $query_timeslot = "OR (`plugin_fusioninventory_timeslots_id` IN (".implode(',', $timeslots)."))";
       }
       //Get all active task requiring an agent wakeup
-      //Check all tasks without timeslot or task with a current active timeslot 
-      $query  = "SELECT `id`, `wakeup_agent_counter`, `wakeup_agent_time`, `last_agent_wakeup` 
-                 FROM `glpi_plugin_fusioninventory_tasks` 
-                 WHERE `wakeup_agent_time` > 0 
+      //Check all tasks without timeslot or task with a current active timeslot
+      $query  = "SELECT `id`, `wakeup_agent_counter`, `wakeup_agent_time`, `last_agent_wakeup`
+                 FROM `glpi_plugin_fusioninventory_tasks`
+                 WHERE `wakeup_agent_time` > 0
                     AND `wakeup_agent_counter` > 0
-                    AND `is_active`='1' 
+                    AND `is_active`='1'
                     AND (`plugin_fusioninventory_timeslots_id`='0'
                     $query_timeslot)";
 
@@ -109,20 +109,20 @@ class PluginFusioninventoryAgentWakeup extends  CommonDBTM {
                continue;
             }
          }
-         
-         //For each task, get a number of taskjobs at the PREPARED state 
+
+         //For each task, get a number of taskjobs at the PREPARED state
          //(the maximum is defined in wakeup_agent_counter)
-         $query_states = "SELECT `taskjobstates`.`plugin_fusioninventory_agents_id`, 
-                                 `tasks`.`id` as `taskID`, 
+         $query_states = "SELECT `taskjobstates`.`plugin_fusioninventory_agents_id`,
+                                 `tasks`.`id` as `taskID`,
                                  `tasks`.`wakeup_agent_time`,
                                  `tasks`.`last_agent_wakeup`
                           FROM `glpi_plugin_fusioninventory_taskjobstates` as `taskjobstates`,
                                `glpi_plugin_fusioninventory_taskjobs` as `taskjobs`
-                          LEFT JOIN `glpi_plugin_fusioninventory_tasks` as `tasks` 
+                          LEFT JOIN `glpi_plugin_fusioninventory_tasks` as `tasks`
                              ON `tasks`.`id`=`taskjobs`.`plugin_fusioninventory_tasks_id`
-                          WHERE `tasks`.`id`='".$task['id']."' 
-                             AND `taskjobs`.`id`=`taskjobstates`.`plugin_fusioninventory_taskjobs_id` 
-                             AND `taskjobstates`.`state`='".PluginFusioninventoryTaskjobstate::PREPARED."' 
+                          WHERE `tasks`.`id`='".$task['id']."'
+                             AND `taskjobs`.`id`=`taskjobstates`.`plugin_fusioninventory_taskjobs_id`
+                             AND `taskjobstates`.`state`='".PluginFusioninventoryTaskjobstate::PREPARED."'
                           ORDER BY `taskjobstates`.`id` ASC LIMIT ".$task['wakeup_agent_counter'];
          foreach ($DB->request($query_states) as $state) {
             $agents_id = $state['plugin_fusioninventory_agents_id'];
@@ -136,7 +136,7 @@ class PluginFusioninventoryAgentWakeup extends  CommonDBTM {
             if (!in_array($state['taskID'], $tasks)) {
                $tasks[] = $state['taskID'];
             }
-            
+
             //Do not process more than the maximum number of wakeup allowed in the configuration
             if ($counter >= $maxWakeUp) {
                if (PluginFusioninventoryConfig::isExtradebugActive()) {
@@ -157,8 +157,8 @@ class PluginFusioninventoryAgentWakeup extends  CommonDBTM {
       $myTask = new PluginFusioninventoryTask();
       if (!empty($tasks)) {
          //Update last wake up time each task
-         $query_lastrun = "UPDATE `glpi_plugin_fusioninventory_tasks` 
-                           SET `last_agent_wakeup`='".$_SESSION['glpi_currenttime']."' 
+         $query_lastrun = "UPDATE `glpi_plugin_fusioninventory_tasks`
+                           SET `last_agent_wakeup`='".$_SESSION['glpi_currenttime']."'
                            WHERE `id` IN (".implode(",", $tasks).")";
          $DB->query($query_lastrun);
 
@@ -171,7 +171,7 @@ class PluginFusioninventoryAgentWakeup extends  CommonDBTM {
             }
          }
       }
-      
+
       $crontask->addVolume($wokeup);
       return true;
    }
