@@ -5915,7 +5915,7 @@ AUTO_INCREMENT=1;";
 
    //Antivirus migration from FI table to GLPi core table
    if (TableExists('glpi_plugin_fusioninventory_inventorycomputerantiviruses')
-     && TableExists('glpi_computerantiviruses')) {
+     && class_exists('ComputerAntivirus')) {
         $antivirus = new ComputerAntivirus();
         foreach (getAllDatasFromTable('glpi_plugin_fusioninventory_inventorycomputerantiviruses') as $ant) {
            unset($ant['id']);
