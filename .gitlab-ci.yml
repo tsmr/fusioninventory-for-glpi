@@ -14,9 +14,9 @@
   - '# prepare archive'
   - git archive --format=tar --prefix=fusioninventory/ $VERSION | gzip > $FI_FILENAME
   - '# copy to mirror'
-  - scp $FI_FILENAME root@vm000139.paas.teclib.infra :vm000139.paas.teclib.infra
+  - scp $FI_FILENAME root@vm000139.paas.teclib.infra :/srv/releases/www/mirror
   - '# fix rights'
-  - ssh root@vm000139.paas.teclib.infra  chown glebouder:users vm000139.paas.teclib.infra /$FI_FILENAME
+  - ssh root@vm000139.paas.teclib.infra  chown glebouder:users /srv/releases/www/mirror/$FI_FILENAME
   tags: 
   except:
   - master
