@@ -1,4 +1,4 @@
-'copy to people mirror only on tags':
+'copy to mirror only for tags':
   script:
   - pwd
   - git submodule update --init
