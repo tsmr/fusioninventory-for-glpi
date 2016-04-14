@@ -1839,8 +1839,7 @@ class PluginFusioninventoryFormatconvert {
             if ((array)$value === $value) {
                $array[$key] = $this->replaceids($value, $itemtype, $items_id);
             } else {
-               if (!PluginFusioninventoryLock::isFieldLocked($a_lockable, $key)
-                  || $key == 'manufacturers_id') {
+               if (!PluginFusioninventoryLock::isFieldLocked($a_lockable, $key)) {
                   if (!is_numeric($key)
                           && ($key == "manufacturers_id"
                               || $key == 'bios_manufacturers_id')) {
