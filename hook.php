@@ -346,7 +346,8 @@ function plugin_fusioninventory_getAddSearchOptions($itemtype) {
         $sopt[5172]['field']         = 'last_contact';
         $sopt[5172]['linkfield']     = '';
         $sopt[5172]['joinparams']    = array('jointype' => 'child');
-        $sopt[5172]['name']          = __('Last contact', 'fusioninventory');
+        $sopt[5172]['name']          = __('FusInv', 'fusioninventory')." - ".
+                                       __('Last contact', 'fusioninventory');
 
    }
 
