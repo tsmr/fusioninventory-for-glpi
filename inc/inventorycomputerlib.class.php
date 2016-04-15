@@ -94,7 +94,11 @@ class PluginFusioninventoryInventoryComputerLib extends CommonDBTM {
       $networkName                  = new NetworkName();
       $iPAddress                    = new IPAddress();
       $ipnetwork                    = new IPNetwork();
-      $pfInventoryComputerAntivirus = new PluginFusioninventoryInventoryComputerAntivirus();
+      if (!class_exists('ComputerAntivirus')) {
+         $pfInventoryComputerAntivirus = new PluginFusioninventoryInventoryComputerAntivirus();
+      } else {
+         $pfInventoryComputerAntivirus = new ComputerAntivirus();
+      }
       $pfConfig                     = new PluginFusioninventoryConfig();
       $pfComputerLicenseInfo        = new PluginFusioninventoryComputerLicenseInfo();
       $pfComputerSolariszone        = new PluginFusioninventoryInventoryComputerSolariszone();
@@ -1328,8 +1332,8 @@ FALSE);
       // * Antivirus
          $db_antivirus = array();
          if ($no_history === FALSE) {
-            $query = "SELECT `id`, `name`, `version`
-                  FROM `glpi_plugin_fusioninventory_inventorycomputerantiviruses`
+            $query = "SELECT `id`, `name`, `antivirus_version`
+                  FROM `".$pfInventoryComputerAntivirus->getTable()."`
                WHERE `computers_id` = '$computers_id'";
             $result = $DB->query($query);
             while ($data = $DB->fetch_assoc($result)) {
@@ -1342,7 +1346,7 @@ FALSE);
          }
          $simpleantivirus = array();
          foreach ($a_computerinventory['antivirus'] as $key=>$a_antivirus) {
-            $a_field = array('name', 'version');
+            $a_field = array('name', 'antivirus_version');
             foreach ($a_field as $field) {
                if (isset($a_antivirus[$field])) {
                   $simpleantivirus[$key][$field] = $a_antivirus[$field];
@@ -1356,6 +1360,7 @@ FALSE);
                   $input = array();
                   $input = $a_computerinventory['antivirus'][$key];
                   $input['id'] = $keydb;
+                  $input['is_dynamic'] = 1;
                   $pfInventoryComputerAntivirus->update($input, !$no_history);
                   unset($simpleantivirus[$key]);
                   unset($a_computerinventory['antivirus'][$key]);
@@ -1376,6 +1381,7 @@ FALSE);
             if (count($a_computerinventory['antivirus']) != 0) {
                foreach($a_computerinventory['antivirus'] as $a_antivirus) {
                   $a_antivirus['computers_id'] = $computers_id;
+                  $a_antivirus['is_dynamic'] = 1;
                   $pfInventoryComputerAntivirus->add($a_antivirus, array(), !$no_history);
                }
             }
@@ -1900,7 +1906,7 @@ FALSE);
                         if (count($portsinstance) == 1) {
                            $portinstance = current($portsinstance);
                            $input = $portinstance;
-                        } 
+                        }
                      }
                      if (isset($inventory_networkports[$key]['speed'])) {
                         $input['speed'] = $inventory_networkports[$key]['speed'];

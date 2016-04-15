@@ -5902,6 +5902,28 @@ AUTO_INCREMENT=1;";
   $migration->addField('glpi_plugin_fusioninventory_ignoredimportdevices',
                        'plugin_fusioninventory_agents_id', 'integer');
   $migration->migrationOneTable("glpi_plugin_fusioninventory_ignoredimportdevices");
+
+   $migration->changeField("glpi_plugin_fusioninventory_inventorycomputerantiviruses",
+                          "uptodate", "is_uptodate",
+                          "bool");
+
+   $migration->changeField("glpi_plugin_fusioninventory_inventorycomputerantiviruses",
+                          "version", "antivirus_version",
+                          "string");
+
+   $migration->migrationOneTable("glpi_plugin_fusioninventory_inventorycomputerantiviruses");
+
+   //Antivirus migration from FI table to GLPi core table
+   if (TableExists('glpi_plugin_fusioninventory_inventorycomputerantiviruses')
+     && class_exists('ComputerAntivirus')) {
+        $antivirus = new ComputerAntivirus();
+        foreach (getAllDatasFromTable('glpi_plugin_fusioninventory_inventorycomputerantiviruses') as $ant) {
+           unset($ant['id']);
+           $ant['is_dynamic'] = 1;
+           $antivirus->add($ant, array(), false);
+        }
+      $migration->dropTable('glpi_plugin_fusioninventory_inventorycomputerantiviruses');
+   }
 }
 
 /**
