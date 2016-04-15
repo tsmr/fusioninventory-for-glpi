@@ -1621,6 +1621,10 @@ class PluginFusioninventoryFormatconvert {
                   if (!isset($array_tmp['version'])) {
                      $array_tmp['version'] = "";
                   }
+                  if (!isset($array_tmp['date_install'])) {
+                     $array_tmp['date_install'] = "";
+                  }
+
                   $array_tmp['is_template_computer'] = 0;
                   $array_tmp['is_deleted_computer'] = 0;
                   $array_tmp['is_recursive']= $is_software_recursive;
