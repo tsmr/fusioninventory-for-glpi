@@ -678,6 +678,13 @@ class PluginFusioninventoryInventoryComputerInventory {
       $state = $config->getValue("states_id_default");
       if ($state) {
          if (!$check_management || ($check_management && !$management_value)) {
+            if (isset($input['id'])) {
+               $locks = PluginFusioninventoryLock::getLockFields('glpi_computers', $input['id']);
+               if (in_array('states_id', $locks)) {
+                  return $input;
+               }
+            }
+
             $input['states_id'] = $state;
          }
       }
