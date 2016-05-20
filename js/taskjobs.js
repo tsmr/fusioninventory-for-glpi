@@ -26,13 +26,13 @@ taskjobs.register_update_method = function (rand_id) {
       );
 };
 
-taskjobs.register_update_items = function (rand_id, moduletype, ajax_url) {
+taskjobs.register_update_items = function (rand_id, moduletype, ajax_url, id) {
    //reset onchange event
    $("#" + rand_id )
       .off("change", "*")
       .on("change",function(e) {
             //$("#taskjob_moduleitems_dropdown").text(e.val);
-            taskjobs.show_moduleitems(ajax_url, moduletype, e.val);
+            taskjobs.show_moduleitems(ajax_url, moduletype, e.val, id);
          });
 };
 
@@ -99,48 +99,60 @@ taskjobs.delete_items_selected = function(moduletype) {
       .remove();
 };
 
-taskjobs.add_item = function (moduletype, itemtype, itemtype_name, rand_id) {
-   item_id = $("#"+rand_id).val();
-   item_name = $("#taskjob_moduleitems_dropdown .select2-chosen").text();
-   if ( item_id > 0 ) {
-      item_to_add = {
-         'id' : itemtype + "-" + item_id,
-         'name' : item_name
-      };
-      item_exists = $('#taskjob_' + moduletype + '_list').find('#'+item_to_add.id);
-      if (item_exists.length === 0) {
-         // Append the element to the list input
-         // TODO: replace this with an ajax call to taskjobview class.
-         $('#taskjob_' + moduletype + '_list')
-            .append(
-               "<div class='taskjob_item new' id='" + item_to_add.id + "'"+
-               //"  onclick='$(this).children(\"input[type=checkbox]\").trigger(\"click\")'"+
-               "  >" +
-               "  <input type='checkbox'>" +
-               "  </input>" +
-               "  <span class='"+itemtype+"'></span>"+
-               "  <label>"+
-               "     <span style='font-style:oblique'>" + itemtype_name +"</span>" +
-               "     "+ item_to_add.name +
-               "  </label>"+
-               "  <input type='hidden' name='"+moduletype+"[]' value='"+item_to_add.id+"'>" +
-               "  </input>" +
-               "</div>"
-            );
-      } else {
-         item_exists.fadeOut(100).fadeIn(100);
-      }
-   }
+taskjobs.add_item = function (ajax_url, moduletype, itemtype, itemtype_name, rand_id) {
+    item_id = $("#" + rand_id).val();
+//   item_name = $("#taskjob_moduleitems_dropdown .select2-chosen").text();
+    $.ajax({
+        url: ajax_url,
+        data: {
+            "moduletype": moduletype,
+            "itemtype": itemtype,
+            "item_id": item_id,
+        },
+        success: function (json, textStatus, jqXHR) {
+            data = JSON.parse(json);
+            for (var item in data) {
+                item_to_add = {
+                    'id': itemtype + "-" + data[item]['id'],
+                    'name': data[item]['name']
+                }
+                item_exists = $('#taskjob_' + moduletype + '_list').find('#' + item_to_add.id);
+                if (item_exists.length == 0) {
+                    // Append the element to the list input
+                    // TODO: replace this with an ajax call to taskjobview class.
+                    $('#taskjob_' + moduletype + '_list')
+                            .append(
+                                    "<div class='taskjob_item new' id='" + item_to_add.id + "'" +
+                                    //"  onclick='$(this).children(\"input[type=checkbox]\").trigger(\"click\")'"+
+                                    "  >" +
+                                    "  <input type='checkbox'>" +
+                                    "  </input>" +
+                                    "  <span class='" + itemtype + "'></span>" +
+                                    "  <label>" +
+                                    "     <span style='font-style:oblique'>" + itemtype_name + "</span>" +
+                                    "     " + item_to_add.name +
+                                    "  </label>" +
+                                    "  <input type='hidden' name='" + moduletype + "[]' value='" + item_to_add.id + "'>" +
+                                    "  </input>" +
+                                    "</div>"
+                                    );
+                } else {
+                    item_exists.fadeOut(100).fadeIn(100);
+                }
+            }
+        }
+    });
 };
 
-taskjobs.show_moduletypes = function(ajax_url, moduletype) {
+taskjobs.show_moduletypes = function(ajax_url, moduletype, method, id) {
    taskjobs.hide_moduletypes_dropdown();
    taskjobs.hide_moduleitems_dropdown();
    $.ajax({
       url: ajax_url,
       data: {
          "moduletype" : moduletype,
-         "method" : $('#method_selected').text()
+         "method" : $('#method_selected').text(),
+         "id" : id,
       },
       success: function( data, textStatus, jqXHR) {
          taskjobs.show_moduletypes_dropdown( data );
@@ -148,14 +160,15 @@ taskjobs.show_moduletypes = function(ajax_url, moduletype) {
    });
 };
 
-taskjobs.show_moduleitems = function(ajax_url, moduletype, itemtype) {
+taskjobs.show_moduleitems = function(ajax_url, moduletype, itemtype, id) {
    taskjobs.hide_moduleitems_dropdown();
    $.ajax({
       url: ajax_url,
       data: {
          "itemtype" : itemtype,
          "moduletype" : moduletype,
-         "method" : $('#method_selected').text()
+         "method" : $('#method_selected').text(),
+         "id" : id
       },
       success: function( data, textStatus, jqXHR) {
          taskjobs.show_moduleitems_dropdown( data );
