@@ -134,8 +134,10 @@ class PluginFusioninventoryCommonView extends CommonDBTM {
          $where .= " AND `is_template` = '0' ";
       }
       $where .= getEntitiesRestrictRequest("AND", $table, '','', $item->maybeRecursive());
-      $add_order = "`$table`.`entities_id`, `$table`.`name`";
-      
+      $add_order = "`$table`.`name`";
+      if ($item->maybeRecursive()) {
+         $add_order = "`$table`.`entities_id`, ".$add_order;
+      }
       //remove those already added
       $taskjob = new PluginFusioninventoryTaskjob();
       if ($taskjob->getFromDB($id)) {
