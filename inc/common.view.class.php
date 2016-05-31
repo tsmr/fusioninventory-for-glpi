@@ -119,7 +119,7 @@ class PluginFusioninventoryCommonView extends CommonDBTM {
       echo "</div>";
 
    }
-   
+
    public function showDropdownMultipleForItemtype($title, $itemtype, $id, $module_type, $options=array()) {
       global $CFG_GLPI;
       echo "<label>" . $title."&nbsp;:" . "</label>";
@@ -155,12 +155,13 @@ class PluginFusioninventoryCommonView extends CommonDBTM {
       }
 
       $tab_items = array();
+      $entity = new Entity();
+      $entity->getEmpty();
       foreach(getAllDatasFromTable($table, $where, false, $add_order ) as $value){
-         if(!isset($entities) || $entities != $value['entities_id']){
+         if($item->isEntityAssign()
+            && (!isset($entities) || $entities != $value['entities_id'])) {
             $entities = $value['entities_id'];
-            $entity = new Entity();
             $entity->getFromDB($entities);
-            
          }
          $tab_items[$entity->getName(array('complete' => true))][$value['id']] = $value['name']." (".$value['id'].")";
       }
