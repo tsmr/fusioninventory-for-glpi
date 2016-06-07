@@ -929,28 +929,30 @@ class PluginFusioninventoryTask extends PluginFusioninventoryTaskView {
 
          foreach( $targets as $target) {
             $item_type = key($target);
-            $item_id = current($target);
+            $item_id   = current($target);
+            $item_name = "";
+            if (strpos($item_id, '$#$')) {
+               list($item_id, $item_name) = explode('$#$', $item_id);
+            }
 
             $target_id = $item_type . "_" . $item_id;
-            if (isset($targets_cache[$target_id])) {
-               $item = $targets_cache[$target_id];
 
-            } else {
-               $item = new $item_type();
-               if($item->getFromDB($item_id)) {
-                  $targets_cache[$target_id] = $item;
+            if($item_name == "") {
+               $item = new $item_type;
+               if ($item->getFromDB($item_id)) {
+                  $item_name = $item->fields['name'];
                }
             }
-            if (isset($item->fields['id'])) {
-               $targets_handle[$target_id] = array(
-                  'id'        => $item->fields['id'],
-                  'name'      => $item->fields['name'],
-                  'type_name' => $item->getTypeName(),
-                  'item_link' => $item->getLinkUrl(),
-                  'counters'  => array(),
-                  'agents' => array()
-               );
-            }
+
+            $targets_handle[$target_id] = array(
+               'id'        => $item_id,
+               'name'      => $item_name,
+               'type_name' => $item_type::getTypeName(),
+               'item_link' => $item_type::getFormURL(true)."?id=$item_id",
+               'counters'  => array(),
+               'agents' => array()
+            );
+
             // create agent states counter lists
             foreach($agent_state_types as $type) {
                $targets_handle[$target_id]['counters'][$type] = array();
