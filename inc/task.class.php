@@ -91,6 +91,7 @@ class PluginFusioninventoryTask extends PluginFusioninventoryTaskView {
       $sopt[3]['field']          = 'completename';
       $sopt[3]['linkfield']      = 'entities_id';
       $sopt[3]['name']           = __('Entity');
+      $sopt[3]['datatype']       = 'dropdown';
 
       $sopt[4]['table']          = $this->getTable();
       $sopt[4]['field']          = 'comment';
@@ -1002,12 +1003,12 @@ class PluginFusioninventoryTask extends PluginFusioninventoryTaskView {
                run.`items_id`, run.`itemtype`,
                MAX(log.`id`) AS max_log_id
             FROM (
-               SELECT 
+               SELECT
                  *
                FROM (
                  SELECT
                      *,
-                     @num := IF(@agent_id = plugin_fusioninventory_agents_id 
+                     @num := IF(@agent_id = plugin_fusioninventory_agents_id
                                 && @taskjob_id = plugin_fusioninventory_taskjobs_id
                                 && @items_id = items_id
                                 && @itemtype = itemtype,
@@ -1017,11 +1018,11 @@ class PluginFusioninventoryTask extends PluginFusioninventoryTaskView {
                      @items_id:=items_id AS tmp_var3,
                      @itemtype:=itemtype AS tmp_var4
                   FROM glpi_plugin_fusioninventory_taskjobstates
-                  ORDER BY plugin_fusioninventory_taskjobs_id, 
-                     plugin_fusioninventory_agents_id, 
-                     itemtype, 
+                  ORDER BY plugin_fusioninventory_taskjobs_id,
+                     plugin_fusioninventory_agents_id,
+                     itemtype,
                      items_id,
-                     id DESC 
+                     id DESC
                ) AS limited_states";
       if ($_SESSION['fi_include_old_jobs'] >= 1) {
          $query_joins['max_run'].= "
@@ -1042,7 +1043,7 @@ class PluginFusioninventoryTask extends PluginFusioninventoryTaskView {
       $query_joins['run'] = "
          INNER JOIN `glpi_plugin_fusioninventory_taskjobstates` AS run
             ON max_run.`max_id` = run.`id`";
-      
+
       $query_joins['log'] = "
          LEFT JOIN `glpi_plugin_fusioninventory_taskjoblogs` as log
             ON log.`id` = max_run.`max_log_id`";
@@ -1073,6 +1074,46 @@ class PluginFusioninventoryTask extends PluginFusioninventoryTaskView {
          )),
          'result' => null
       );
+
+
+      /*
+       * Get last finished jobstates (ie. `state` >= 3)
+       */
+      $query_joins['max_run'] = implode("\n",array(
+         "INNER JOIN (",
+         "  SELECT",
+         "     MAX(run.`id`) AS max_id,",
+         "     run.`plugin_fusioninventory_agents_id`,",
+         "     run.`plugin_fusioninventory_taskjobs_id`,",
+         "     run.`items_id`, run.`itemtype`,",
+         "     MAX(log.`id`) AS max_log_id",
+         "  FROM `glpi_plugin_fusioninventory_taskjobstates` AS run",
+         "  LEFT JOIN `glpi_plugin_fusioninventory_taskjoblogs` AS log",
+         "  ON log.`plugin_fusioninventory_taskjobstates_id` = run.`id`",
+         "  WHERE run.`state` IN ( ".
+            implode(",", array(
+               PluginFusioninventoryTaskjobstate::FINISHED,
+               PluginFusioninventoryTaskjobstate::IN_ERROR,
+            )) .
+         " )",
+         "  GROUP BY",
+         "     run.`plugin_fusioninventory_agents_id`,",
+         "     run.`plugin_fusioninventory_taskjobs_id`,",
+         "     run.`items_id`, run.`itemtype`",
+         ") max_run ON max_run.`plugin_fusioninventory_agents_id` = agent.`id`",
+      ));
+      $queries['2_finished_runs'] = array(
+         'query' => implode(" \n", array(
+            "SELECT",
+            implode( ",\n", $query_select),
+            "FROM `glpi_plugin_fusioninventory_agents` AS agent",
+            implode( "\n", $query_joins),
+            implode( "\n", $query_where),
+            "GROUP BY job.`id`, agent.`id`, run.`id`, log.`id`",
+         )),
+         'result' => null
+      );
+
 
       $query_chrono = array(
          "start" => microtime(true),

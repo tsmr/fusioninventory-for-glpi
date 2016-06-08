@@ -82,7 +82,12 @@ class PluginFusioninventoryDeployMirror extends CommonDBTM {
       $pfAgent->getFromDB($agents_id);
       $agent = $pfAgent->fields;
 
-      $results = getAllDatasFromTable('glpi_plugin_fusioninventory_deploymirrors');
+      $ancestors = getAncestorsOf('glpi_entities', $agent['entities_id']);
+
+      $results = getAllDatasFromTable(
+              'glpi_plugin_fusioninventory_deploymirrors',
+              "(`entities_id` IN ('".implode("', '", $ancestors)."') AND `is_recursive`='1')"
+              . " OR `entities_id`='".$agent['entities_id']."'");
       if (!isset($agent) || !isset($agent['computers_id'])) {
          return array();
       }
@@ -217,7 +222,7 @@ class PluginFusioninventoryDeployMirror extends CommonDBTM {
       $tab[80]['table']     = 'glpi_entities';
       $tab[80]['field']     = 'completename';
       $tab[80]['name']      = __('Entity');
-
+      $tab[80]['datatype']  = 'dropdown';
 
       $tab[81]['table']     = getTableNameForForeignKeyField('locations_id');
       $tab[81]['field']     = 'completename';

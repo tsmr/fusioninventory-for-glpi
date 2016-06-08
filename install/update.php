@@ -1676,7 +1676,8 @@ function pluginFusioninventoryUpdate($current_version, $migrationname='Migration
             '*',
             'System Product Name',
             'Product Name',
-            'System Name');
+            'System Name',
+            'All Series');
          foreach ($a_input as $value) {
             $query = "SELECT * FROM `".$newTable."`
                WHERE `plugin_fusioninventory_criterium_id`='".$a_criteria['smodel']."'
@@ -2356,11 +2357,11 @@ function pluginFusioninventoryUpdate($current_version, $migrationname='Migration
          $migration->changeField($newTable,
                               "date",
                               "date_mod",
-                              "datetime NOT NULL DEFAULT '0000-00-00 00:00:00'");
+                              "datetime DEFAULT NULL");
          $migration->changeField($newTable,
                               "date_mod",
                               "date_mod",
-                              "datetime NOT NULL DEFAULT '0000-00-00 00:00:00'");
+                              "datetime DEFAULT NULL");
          $migration->changeField($newTable,
                               "creation",
                               "creation",
@@ -2392,7 +2393,7 @@ function pluginFusioninventoryUpdate($current_version, $migrationname='Migration
                               "int(11) NOT NULL AUTO_INCREMENT");
          $migration->addField($newTable,
                               "date_mod",
-                              "datetime NOT NULL DEFAULT '0000-00-00 00:00:00'");
+                              "datetime DEFAULT NULL");
          $migration->addField($newTable,
                               "creation",
                               "tinyint(1) NOT NULL DEFAULT '0'");
@@ -2596,7 +2597,7 @@ function pluginFusioninventoryUpdate($current_version, $migrationname='Migration
          $migration->changeField($newTable,
                                  "date",
                                  "date",
-                                 "datetime NOT NULL DEFAULT '0000-00-00 00:00:00'");
+                                 "datetime DEFAULT NULL");
          $migration->changeField($newTable,
                                  "pages_total",
                                  "pages_total",
@@ -2663,7 +2664,7 @@ function pluginFusioninventoryUpdate($current_version, $migrationname='Migration
                                  "int(11) NOT NULL DEFAULT '0'");
          $migration->addField($newTable,
                                  "date",
-                                 "datetime NOT NULL DEFAULT '0000-00-00 00:00:00'");
+                                 "datetime DEFAULT NULL");
          $migration->addField($newTable,
                                  "pages_total",
                                  "int(11) NOT NULL DEFAULT '0'");
@@ -2885,7 +2886,7 @@ function pluginFusioninventoryUpdate($current_version, $migrationname='Migration
          $migration->changeField($newTable,
                                  "lastup",
                                  "lastup",
-                                 "datetime NOT NULL DEFAULT '0000-00-00 00:00:00'");
+                                 "datetime DEFAULT NULL");
       $migration->migrationOneTable($newTable);
          $migration->changeField($newTable,
                                  "ID",
@@ -2955,7 +2956,7 @@ function pluginFusioninventoryUpdate($current_version, $migrationname='Migration
                                  "tinyint(1) NOT NULL DEFAULT '0'");
          $migration->addField($newTable,
                                  "lastup",
-                                 "datetime NOT NULL DEFAULT '0000-00-00 00:00:00'");
+                                 "datetime DEFAULT NULL");
          $migration->addKey($newTable,
                             "networkports_id");
       $migration->migrationOneTable($newTable);
@@ -3498,11 +3499,11 @@ function pluginFusioninventoryUpdate($current_version, $migrationname='Migration
          $migration->changeField($newTable,
                                  "start_time",
                                  "start_time",
-                                 "datetime NOT NULL DEFAULT '0000-00-00 00:00:00'");
+                                 "datetime DEFAULT NULL");
          $migration->changeField($newTable,
                                  "end_time",
                                  "end_time",
-                                 "datetime NOT NULL DEFAULT '0000-00-00 00:00:00'");
+                                 "datetime DEFAULT NULL");
          $migration->changeField($newTable,
                                  "date_mod",
                                  "date_mod",
@@ -3543,10 +3544,10 @@ function pluginFusioninventoryUpdate($current_version, $migrationname='Migration
                                  "int(11) NOT NULL DEFAULT '0'");
          $migration->addField($newTable,
                                  "start_time",
-                                 "datetime NOT NULL DEFAULT '0000-00-00 00:00:00'");
+                                 "datetime DEFAULT NULL");
          $migration->addField($newTable,
                                  "end_time",
-                                 "datetime NOT NULL DEFAULT '0000-00-00 00:00:00'");
+                                 "datetime DEFAULT NULL");
          $migration->addField($newTable,
                                  "date_mod",
                                  "datetime DEFAULT NULL");
@@ -5804,6 +5805,15 @@ function pluginFusioninventoryUpdate($current_version, $migrationname='Migration
    $pfNetworkporttype = new PluginFusioninventoryNetworkporttype();
    $pfNetworkporttype->init();
 
+   // Fix software version in computers. see https://github.com/fusioninventory/fusioninventory-for-glpi/issues/1810
+   $query = "SELECT * FROM `glpi_computers` WHERE `entities_id` > 0";
+   $result=$DB->query($query);
+   while ($data=$DB->fetch_array($result)) {
+      $DB->query("UPDATE `glpi_computers_softwareversions` SET `entities_id`='".$data['entities_id']."'
+                     WHERE `computers_id`='".$data['id']."'"
+              . "AND `is_dynamic`='1' AND `entities_id`='0'");
+   }
+
    if (TableExists('glpi_plugin_fusioninventory_profiles')) {
       //Migrate rights to the new system introduction in GLPI 0.85
       PluginFusioninventoryProfile::migrateProfiles();
@@ -6040,15 +6050,18 @@ function plugin_fusioninventory_displayMigrationMessage ($id, $msg="") {
 function changeDisplayPreference($olditemtype, $newitemtype) {
    global $DB;
 
-   $query = "SELECT *, count(`id`) as `cnt` FROM `glpi_displaypreferences`
+   $query = "SELECT `users_id`, `num`, count(*) as `cnt`, GROUP_CONCAT( id SEPARATOR ' ') as id
+   FROM `glpi_displaypreferences`
    WHERE (`itemtype` = '".$newitemtype."'
    OR `itemtype` = '".$olditemtype."')
    group by `users_id`, `num`";
    $result=$DB->query($query);
    while ($data=$DB->fetch_array($result)) {
       if ($data['cnt'] > 1) {
+         $ids = explode(' ', $data['id']);
+         array_shift($ids);
          $queryd = "DELETE FROM `glpi_displaypreferences`
-            WHERE `id`='".$data['id']."'";
+            WHERE `id` IN ('".implode("', '", $ids)."')";
          $DB->query($queryd);
       }
    }
@@ -7869,15 +7882,18 @@ function update213to220_ConvertField($migration) {
 function pluginFusioninventorychangeDisplayPreference($olditemtype, $newitemtype) {
    global $DB;
 
-   $query = "SELECT *, count(`id`) as `cnt` FROM `glpi_displaypreferences`
+   $query = "SELECT `users_id`, `num`, count(*) as `cnt`, GROUP_CONCAT( id SEPARATOR ' ') as id
+   FROM `glpi_displaypreferences`
    WHERE (`itemtype` = '".$newitemtype."'
    OR `itemtype` = '".$olditemtype."')
    group by `users_id`, `num`";
    $result=$DB->query($query);
    while ($data=$DB->fetch_array($result)) {
       if ($data['cnt'] > 1) {
+         $ids = explode(' ', $data['id']);
+         array_shift($ids);
          $queryd = "DELETE FROM `glpi_displaypreferences`
-            WHERE `id`='".$data['id']."'";
+            WHERE `id` IN ('".implode("', '", $ids)."')";
          $DB->query($queryd);
       }
    }

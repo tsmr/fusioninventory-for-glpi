@@ -57,7 +57,6 @@ if (isset($_GET['action'])) {
 
       case 'getJobs':
          if(isset($_GET['machineid'])) {
-
             $a_agent = $pfAgent->InfosByKey(Toolbox::addslashes_deep($_GET['machineid']));
             if (isset($a_agent['id'])) {
                $moduleRun = $pfTaskjobstate->getTaskjobsAgent($a_agent['id']);
@@ -85,6 +84,25 @@ if (isset($_GET['action'])) {
 
                         }
                      }
+                     $pfTaskjobstate->changeStatus(
+                             $taskjobstate->fields['id'],
+                             PluginFusioninventoryTaskjobstate::SERVER_HAS_SENT_DATA
+                     );
+
+                     $a_input = array();
+                     $a_input['plugin_fusioninventory_taskjobstates_id'] = $taskjobstate->fields['id'];
+                     $a_input['items_id'] = $agent['id'];
+                     $a_input['itemtype'] = 'PluginFusioninventoryAgent';
+                     $a_input['date'] = date("Y-m-d H:i:s");
+                     $a_input['comment'] = '';
+                     $a_input['state'] = PluginFusioninventoryTaskjoblog::TASK_STARTED;
+                     $pfTaskjoblog->add($a_input);
+                  }
+                  // return an empty dictionnary if there are no jobs.
+                  if (count($order->jobs) == 0) {
+                     $response = "{}";
+                  } else {
+                     $response = json_encode($order);
                   }
                }
             }
@@ -115,7 +133,6 @@ if (isset($_GET['action'])) {
             unset($a_values['_sid']);
 
             $pfCollect->getFromDB($jobstate['items_id']);
-
             switch ($pfCollect->fields['type']) {
                case 'registry':
                   $pfCollect_subO = new PluginFusioninventoryCollect_Registry_Content();
