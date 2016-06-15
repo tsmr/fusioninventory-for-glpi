@@ -470,7 +470,7 @@ class PluginFusioninventoryAgent extends CommonDBTM {
       echo "</td>";
       echo "<td>".__('FusionInventory tag', 'fusioninventory')."&nbsp:</td>";
       echo "<td align='center'>";
-      echo $this->fields["tag"];
+      Html::autocompletionTextField($this,'tag', array('size' => 40));
       echo "</td>";
       echo "</tr>";
 

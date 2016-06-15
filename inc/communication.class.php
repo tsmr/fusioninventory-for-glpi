@@ -290,9 +290,12 @@ class PluginFusioninventoryCommunication {
     * Set prolog for agent
     *
     **/
-   function addProlog() {
+   function addProlog($tag = "") {
       $pfConfig = new PluginFusioninventoryConfig();
       $this->message->addChild('PROLOG_FREQ', $pfConfig->getValue("inventory_frequence"));
+      if (!empty($tag)) {
+         $this->message->addChild('PROLOG_TAG', $tag);
+      }
    }
 
 
@@ -464,7 +467,7 @@ class PluginFusioninventoryCommunication {
             // ******** Send XML
 
             $communication->addInventory($a_agent['id']);
-            $communication->addProlog();
+            $communication->addProlog($a_agent['tag']);
             $communication->sendMessage($compressmode);
          }
       } else {
