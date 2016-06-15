@@ -349,6 +349,7 @@ function plugin_fusioninventory_getAddSearchOptions($itemtype) {
         $sopt[5172]['name']          = __('FusInv', 'fusioninventory')." - ".
                                        __('Last contact', 'fusioninventory');
 
+        $sopt += PluginFusioninventoryCollect::getSearchOptionsToAdd();
    }
 
    if ($itemtype == 'Entity') {
