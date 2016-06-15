@@ -103,6 +103,7 @@ CREATE TABLE `glpi_plugin_fusioninventory_tasks` (
   `datetime_start` datetime DEFAULT NULL,
   `datetime_end` datetime DEFAULT NULL,
   `plugin_fusioninventory_timeslots_id` int(11) NOT NULL DEFAULT '0',
+  `plugin_fusioninventory_timeslots_exec_id` int(11) NOT NULL DEFAULT '0',
   `last_agent_wakeup` datetime DEFAULT NULL,
   `wakeup_agent_counter` int(11) NOT NULL DEFAULT '0',
   `wakeup_agent_time` int(11) NOT NULL DEFAULT '0',

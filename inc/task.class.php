@@ -216,7 +216,7 @@ class PluginFusioninventoryTask extends PluginFusioninventoryTaskView {
          "SELECT",
          "     task.`id`, task.`name`, task.`is_active`,",
          "     task.`datetime_start`, task.`datetime_end`,",
-         "     task.`plugin_fusioninventory_timeslots_id` as timeslot_id,",
+         "     task.`plugin_fusioninventory_timeslots_exec_id` as timeslot_id,",
          "     job.`id`, job.`name`, job.`method`, job.`actors`,",
          "     run.`itemtype`, run.`items_id`, run.`state`,",
          "     run.`id`, run.`plugin_fusioninventory_agents_id`",

@@ -87,6 +87,10 @@ function pluginFusioninventoryUpdateTasks( $migration , $plugin_id) {
          'type'    => 'integer',
          'value'   => NULL
       ),
+      'plugin_fusioninventory_timeslots_exec_id' => array(
+         'type'    => 'integer',
+         'value'   => NULL
+      ),
    );
 
    $table['oldfields']  = array(
