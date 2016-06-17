@@ -1076,45 +1076,6 @@ class PluginFusioninventoryTask extends PluginFusioninventoryTaskView {
       );
 
 
-      /*
-       * Get last finished jobstates (ie. `state` >= 3)
-       */
-      $query_joins['max_run'] = implode("\n",array(
-         "INNER JOIN (",
-         "  SELECT",
-         "     MAX(run.`id`) AS max_id,",
-         "     run.`plugin_fusioninventory_agents_id`,",
-         "     run.`plugin_fusioninventory_taskjobs_id`,",
-         "     run.`items_id`, run.`itemtype`,",
-         "     MAX(log.`id`) AS max_log_id",
-         "  FROM `glpi_plugin_fusioninventory_taskjobstates` AS run",
-         "  LEFT JOIN `glpi_plugin_fusioninventory_taskjoblogs` AS log",
-         "  ON log.`plugin_fusioninventory_taskjobstates_id` = run.`id`",
-         "  WHERE run.`state` IN ( ".
-            implode(",", array(
-               PluginFusioninventoryTaskjobstate::FINISHED,
-               PluginFusioninventoryTaskjobstate::IN_ERROR,
-            )) .
-         " )",
-         "  GROUP BY",
-         "     run.`plugin_fusioninventory_agents_id`,",
-         "     run.`plugin_fusioninventory_taskjobs_id`,",
-         "     run.`items_id`, run.`itemtype`",
-         ") max_run ON max_run.`plugin_fusioninventory_agents_id` = agent.`id`",
-      ));
-      $queries['2_finished_runs'] = array(
-         'query' => implode(" \n", array(
-            "SELECT",
-            implode( ",\n", $query_select),
-            "FROM `glpi_plugin_fusioninventory_agents` AS agent",
-            implode( "\n", $query_joins),
-            implode( "\n", $query_where),
-            "GROUP BY job.`id`, agent.`id`, run.`id`, log.`id`",
-         )),
-         'result' => null
-      );
-
-
       $query_chrono = array(
          "start" => microtime(true),
          "end"   => 0
