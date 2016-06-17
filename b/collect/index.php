@@ -84,25 +84,6 @@ if (isset($_GET['action'])) {
 
                         }
                      }
-                     $pfTaskjobstate->changeStatus(
-                             $taskjobstate->fields['id'],
-                             PluginFusioninventoryTaskjobstate::SERVER_HAS_SENT_DATA
-                     );
-
-                     $a_input = array();
-                     $a_input['plugin_fusioninventory_taskjobstates_id'] = $taskjobstate->fields['id'];
-                     $a_input['items_id'] = $agent['id'];
-                     $a_input['itemtype'] = 'PluginFusioninventoryAgent';
-                     $a_input['date'] = date("Y-m-d H:i:s");
-                     $a_input['comment'] = '';
-                     $a_input['state'] = PluginFusioninventoryTaskjoblog::TASK_STARTED;
-                     $pfTaskjoblog->add($a_input);
-                  }
-                  // return an empty dictionnary if there are no jobs.
-                  if (count($order->jobs) == 0) {
-                     $response = "{}";
-                  } else {
-                     $response = json_encode($order);
                   }
                }
             }
