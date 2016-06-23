@@ -82,8 +82,6 @@ class PluginFusioninventoryDeployMirror extends CommonDBTM {
       $pfAgent->getFromDB($agents_id);
       $agent = $pfAgent->fields;
 
-      $ancestors = getAncestorsOf('glpi_entities', $agent['entities_id']);
-
       $results = getAllDatasFromTable('glpi_plugin_fusioninventory_deploymirrors');
       if (!isset($agent) || !isset($agent['computers_id'])) {
          return array();
