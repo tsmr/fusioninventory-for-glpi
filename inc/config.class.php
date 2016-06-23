@@ -748,6 +748,20 @@ class PluginFusioninventoryConfig extends CommonDBTM {
       echo "</td>";
       echo "</tr>";
 
+      echo "<tr>";
+      echo "<td>".__('Match mirrors to agents', 'fusioninventory')."&nbsp;:</td>";
+      echo "<td>";
+      $mirror_options = array(
+         PluginFusioninventoryDeployMirror::MATCH_LOCATION => __('with location', 'fusioninventory'),
+         PluginFusioninventoryDeployMirror::MATCH_ENTITY   => __('with entity', 'fusioninventory'),
+         PluginFusioninventoryDeployMirror::MATCH_BOTH     => __('with both', 'fusioninventory')
+      );
+      Dropdown::showFromArray('mirror_match',
+                              $mirror_options,
+                              array('value' => $pfConfig->getValue('mirror_match')));
+      echo "</td>";
+      echo "</tr>";
+
       $options['candel'] = FALSE;
       $pfConfig->showFormButtons($options);
 
