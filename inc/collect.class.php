@@ -75,7 +75,7 @@ class PluginFusioninventoryCollect extends CommonDBTM {
       $i = 5200;
 
       $pfCollect_Registry = new PluginFusioninventoryCollect_Registry();
-      foreach ($pfCollect_Registry->find(getEntitiesRestrictRequest(" AND", $pfCollect_Registry->getTable())) as $registry) {
+      foreach ($pfCollect_Registry->find(getEntitiesRestrictRequest("", $pfCollect_Registry->getTable())) as $registry) {
 
          $tab[$i]['table']         = 'glpi_plugin_fusioninventory_collects_registries_contents';
          $tab[$i]['field']         = 'value';
@@ -93,7 +93,7 @@ class PluginFusioninventoryCollect extends CommonDBTM {
 
 
       $pfCollect_Wmi = new PluginFusioninventoryCollect_Wmi();
-      foreach ($pfCollect_Wmi->find(getEntitiesRestrictRequest(" AND", $pfCollect_Wmi->getTable())) as $wmi) {
+      foreach ($pfCollect_Wmi->find(getEntitiesRestrictRequest("", $pfCollect_Wmi->getTable())) as $wmi) {
 
          $tab[$i]['table']         = 'glpi_plugin_fusioninventory_collects_wmis_contents';
          $tab[$i]['field']         = 'value';
@@ -111,7 +111,7 @@ class PluginFusioninventoryCollect extends CommonDBTM {
 
 
       $pfCollect_File = new PluginFusioninventoryCollect_File();
-      foreach ($pfCollect_File->find(getEntitiesRestrictRequest(" AND", $pfCollect_File->getTable())) as $file) {
+      foreach ($pfCollect_File->find(getEntitiesRestrictRequest("", $pfCollect_File->getTable())) as $file) {
 
          $tab[$i]['table']         = 'glpi_plugin_fusioninventory_collects_files_contents';
          $tab[$i]['field']         = 'pathfile';
