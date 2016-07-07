@@ -796,6 +796,7 @@ class PluginFusioninventoryDeployPackage extends CommonDBTM {
 
                foreach (file(GLPI_PLUGIN_DOC_DIR."/fusioninventory/files/manifests/".$hash) 
                            as $sha512) {
+                  $sha512 = trim($sha512);
                   $filepart = PluginFusioninventoryDeployFile::getDirBySha512($sha512).
                           "/".$sha512;
 
