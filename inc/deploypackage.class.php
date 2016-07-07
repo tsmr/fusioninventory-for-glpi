@@ -790,21 +790,34 @@ class PluginFusioninventoryDeployPackage extends CommonDBTM {
             $zip->addEmptyDir('files/manifests');
             $zip->addEmptyDir('files/repository');
             foreach ($a_files as $hash=>$data) {
-               $sha512 = file_get_contents(GLPI_PLUGIN_DOC_DIR."/fusioninventory/files/manifests/".$hash);
-               $sha512 = trim($sha512);
-               $zip->addFile(GLPI_PLUGIN_DOC_DIR."/fusioninventory/files/manifests/".$hash, "files/manifests/".$hash);
+               $zip->addFile(GLPI_PLUGIN_DOC_DIR."/fusioninventory/files/manifests/".$hash, 
+                              "files/manifests/".$hash);
                $a_xml['manifests'][] = $hash;
-               $file = PluginFusioninventoryDeployFile::getDirBySha512($sha512).
-                       "/".$sha512;
-               $zip->addFile(GLPI_PLUGIN_DOC_DIR."/fusioninventory/files/repository/".$file, "files/repository/".$file);
-               $a_xml['repository'][] = $file;
+
+               foreach (file(GLPI_PLUGIN_DOC_DIR."/fusioninventory/files/manifests/".$hash) 
+                           as $sha512) {
+                  $sha512 = trim($sha512);
+                  $filepart = PluginFusioninventoryDeployFile::getDirBySha512($sha512).
+                          "/".$sha512;
+
+                  $zip->addEmptyDir('files/repository/'.substr($sha512, 0, 1));
+                  $zip->addEmptyDir('files/repository/'.substr($sha512, 0, 1).
+                                    '/'.substr($sha512, 0, 2));
+
+                  $zip->addFile(GLPI_PLUGIN_DOC_DIR."/fusioninventory/files/repository/".$filepart,
+                                                   "files/repository/".$filepart);
+                  
+                  $a_xml['repository'][] = $filepart;
+               }
             }
 
             $json_string = json_encode($a_xml);
             $zip->addFromString('information.json', $json_string);
          }
          $zip->close();
-         Session::addMessageAfterRedirect(__("Package exported in", "fusioninventory")." ".GLPI_PLUGIN_DOC_DIR."/fusioninventory/files/export/".$this->fields['uuid'].".".$name.".zip");
+         Session::addMessageAfterRedirect(__("Package exported in", "fusioninventory")." ".
+                                          GLPI_PLUGIN_DOC_DIR."/fusioninventory/files/export/".
+                                          $this->fields['uuid'].".".$name.".zip");
       }
    }
 
