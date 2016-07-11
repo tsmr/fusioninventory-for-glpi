@@ -735,7 +735,7 @@ class PluginFusioninventoryMenu extends CommonGLPI {
       }
       $width_status = ($width + $width_status);
 
-      echo "<table class='tab_cadre' style='position: relative; z-index: 30;'
+      echo "<table class='tab_cadre' style='position: relative; z-index: 130;'
          onMouseOver='document.getElementById(\"menu".$menu_name."\").style.display=\"block\"'
          onMouseOut='document.getElementById(\"menu".$menu_name."\").style.display=\"none\"'>";
 
