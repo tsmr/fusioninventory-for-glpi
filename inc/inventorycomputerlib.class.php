@@ -1499,8 +1499,8 @@ FALSE);
       foreach ($a_computerinventory['monitor'] as $key => $arrays) {
          $input = array();
          $input['itemtype'] = "Monitor";
-         $input['name']     = $arrays['name'];
-         $input['serial']   = $arrays['serial'];
+         $input['name']     = isset($arrays['name']) ? $arrays['name'] : '';
+         $input['serial']   = isset($arrays['serial']) ? $arrays['serial'] : '';
          $data = $rule->processAllRules($input, array(), array('class'=>$this, 'return' => TRUE));
          if (isset($data['found_equipment'])) {
             if ($data['found_equipment'][0] == 0) {
@@ -1662,8 +1662,8 @@ FALSE);
       foreach ($a_computerinventory['peripheral'] as $key => $arrays) {
          $input = array();
          $input['itemtype'] = "Peripheral";
-         $input['name']     = isset($arrays['name'])?$arrays['name']:"";
-         $input['serial']   = $arrays['serial'];
+         $input['name']     = isset($arrays['name']) ? $arrays['name'] : '';
+         $input['serial']   = isset($arrays['serial']) ? $arrays['serial'] : '';
          $data = $rule->processAllRules($input, array(), array('class'=>$this, 'return' => TRUE));
          if (isset($data['found_equipment'])) {
             if ($data['found_equipment'][0] == 0) {
