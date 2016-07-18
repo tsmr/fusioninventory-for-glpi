@@ -74,7 +74,7 @@ if (isset($_GET['action'])) {
                   } else {
                      $order = new \stdClass();
                      $order->jobs = array();
-                     foreach ($array as $data) {
+                     foreach ($taskjobstate as $data) {
                         $out = $pfCollect->run($data, $a_agent);
                         if (count($out) > 0) {
                            $oder->jobs[] = $out;
