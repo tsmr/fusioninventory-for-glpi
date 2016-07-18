@@ -57,32 +57,47 @@ if (isset($_GET['action'])) {
 
       case 'getJobs':
          if(isset($_GET['machineid'])) {
+            $pfAgentModule  = new PluginFusioninventoryAgentModule();
+            $pfTask         = new PluginFusioninventoryTask();
+
             $a_agent = $pfAgent->InfosByKey(Toolbox::addslashes_deep($_GET['machineid']));
             if (isset($a_agent['id'])) {
-               $moduleRun = $pfTaskjobstate->getTaskjobsAgent($a_agent['id']);
-               foreach ($moduleRun as $className => $array) {
-                  if (class_exists($className)) {
-                     if ($className == "PluginFusioninventoryCollect") {
-                        $response['jobs'] = array();
-                        foreach ($array as $data) {
-                           $out = $pfCollect->run($data, $a_agent);
-                           if (count($out) > 0) {
-                              $response['jobs'] = array_merge($response['jobs'], $out);
-                              $response['postmethod'] = 'POST';
-                              $response['token'] = Session::getNewCSRFToken();
-                           }
-
-                           $a_input = array();
-                           $a_input['plugin_fusioninventory_taskjobstates_id'] = $data['id'];
-                           $a_input['items_id'] = $a_agent['id'];
-                           $a_input['itemtype'] = 'PluginFusioninventoryAgent';
-                           $a_input['date'] = date("Y-m-d H:i:s");
-                           $a_input['comment'] = '';
-                           $a_input['state'] = PluginFusioninventoryTaskjoblog::TASK_STARTED;
-                           $pfTaskjoblog->add($a_input);
-
-
+               $taskjobstates = $pfTask->getTaskjobstatesForAgent(
+                  $a_agent['id'],
+                  array('collect')
+               );
+               foreach ($taskjobstates as $className => $taskjobstate) {
+                  if (!$pfAgentModule->isAgentCanDo("Collect", $agent['id'])) {
+                     $taskjobstate->cancel(
+                        __("Collect module has been disabled for this agent", 'fusioninventory')
+                     );
+                  } else {
+                     $order = new \stdClass();
+                     $order->jobs = array();
+                     foreach ($array as $data) {
+                        $out = $pfCollect->run($data, $a_agent);
+                        if (count($out) > 0) {
+                           $oder->jobs[] = $out;
                         }
+
+                        // change status of state table row
+                        $pfTaskjobstate->changeStatus(
+                           $jobstate['id'],
+                           PluginFusioninventoryTaskjobstate::AGENT_HAS_SENT_DATA
+                        );
+
+                        $a_input = array(
+                           'plugin_fusioninventory_taskjobstates_id'    => $data['id'],
+                           'items_id'                                   => $a_agent['id'],
+                           'itemtype'                                   => 'PluginFusioninventoryAgent',
+                           'date'                                       => date("Y-m-d H:i:s"),
+                           'comment'                                    => '',
+                           'state'                                      => PluginFusioninventoryTaskjoblog::TASK_STARTED
+                       );
+                        $pfTaskjoblog->add($a_input);
+                     }
+                     if (count($order->jobs > 0)) {
+                         $response = $order;
                      }
                   }
                }
@@ -114,16 +129,27 @@ if (isset($_GET['action'])) {
             unset($a_values['_sid']);
 
             $pfCollect->getFromDB($jobstate['items_id']);
+
             switch ($pfCollect->fields['type']) {
                case 'registry':
+                  // update registry content
                   $pfCollect_subO = new PluginFusioninventoryCollect_Registry_Content();
                   break;
 
                case 'wmi':
+                  // update wmi content
                   $pfCollect_subO = new PluginFusioninventoryCollect_Wmi_Content();
                   break;
 
                case 'file':
+                  // update files content
+                  $params = array(
+                     'machineid' => $pfAgent->fields['device_id'],
+                     'uuid'      => $_GET['uuid'],
+                     'code'      => 'running',
+                     'msg'       => "file ".$a_values['path']." | size ".$a_values['size']
+                  );
+                  PluginFusioninventoryCommunicationRest::updateLog($params);
                   $pfCollect_subO = new PluginFusioninventoryCollect_File_Content();
                   $a_values = array($sid => $a_values);
                   break;
