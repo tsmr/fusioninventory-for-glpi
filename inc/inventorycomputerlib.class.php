@@ -1896,8 +1896,12 @@ FALSE);
                // Add / update instantiation_type
                if (isset($inventory_networkports[$key]['instantiation_type'])) {
                   $instantiation_type = $inventory_networkports[$key]['instantiation_type'];
-                  if (in_array($instantiation_type, array('NetworkPortEthernet',
-                                                          'NetworkPortFiberchannel'))) {
+
+                  $types = array('NetworkPortEthernet');
+                  if (class_exists('NetworkPortFiberchannel')) {
+                     $types[] = 'NetworkPortFiberchannel';
+                  }
+                  if (in_array($instantiation_type, $types)) {
                      $input = array(
                         'networkports_id' => $keydb
                      );
@@ -2042,9 +2046,12 @@ FALSE);
                   $iPAddress->add($input, array(), !$no_history);
                }
                if (isset($a_networkport['instantiation_type'])) {
+                  $types[] = 'NetworkPortEthernet';
+                  if (class_exists('NetworkPortFiberchannel')) {
+                     $types[] = 'NetworkPortFiberchannel';
+                  }
                   $instantiation_type = $a_networkport['instantiation_type'];
-                  if (in_array($instantiation_type, array('NetworkPortEthernet',
-                                                          'NetworkPortFiberchannel'))) {
+                  if (in_array($instantiation_type, $types)) {
                      $instance = new $instantiation_type;
                      $input = array(
                         'networkports_id' => $a_networkport['items_id']
