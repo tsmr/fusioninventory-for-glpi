@@ -60,10 +60,8 @@ class PluginFusioninventoryInventoryRuleImport extends Rule {
 
 
    // From Rule
-   static public $right = 'rule_import';
+   static public $rightname = 'plugin_fusioninventory_ruleimport';
    public $can_sort = TRUE;
-
-
 
    function getTitle() {
 
