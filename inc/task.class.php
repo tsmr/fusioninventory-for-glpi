@@ -821,8 +821,8 @@ class PluginFusioninventoryTask extends PluginFusioninventoryTaskView {
          $query_where[] = getEntitiesRestrictRequest("AND", 'task');
       }
 
-      if (is_array($task_ids) 
-          && count($task_ids) > 0 
+      if (is_array($task_ids)
+          && count($task_ids) > 0
           && $task_ids[0] != "[]") {
          $query_where[] = "AND task.`id` IN (" . implode(",",$task_ids) . ")";
       }
@@ -1513,9 +1513,9 @@ class PluginFusioninventoryTask extends PluginFusioninventoryTaskView {
       if (isset($_REQUEST['agent_state_types'])) {
          $agent_state_types = $_REQUEST['agent_state_types'];
       }
-      
-      // 0 : no debug (really export to csv, 
-      // 1 : display final table, 
+
+      // 0 : no debug (really export to csv,
+      // 1 : display final table,
       // 2 : also display json
       define('DEBUG_CSV', 0);
 
@@ -1613,7 +1613,7 @@ class PluginFusioninventoryTask extends PluginFusioninventoryTaskView {
                      echo $exec['state'].NL;
                      $log_cpt++;
 
-                     if ($_SESSION['fi_include_old_jobs'] != -1 
+                     if ($_SESSION['fi_include_old_jobs'] != -1
                          && $log_cpt >= $_SESSION['fi_include_old_jobs']) {
                         break;
                      }
@@ -1641,7 +1641,7 @@ class PluginFusioninventoryTask extends PluginFusioninventoryTaskView {
       if (DEBUG_CSV === 2) {
          echo "</td></tr></table>";
 
-         //echo original datas 
+         //echo original datas
          echo "<pre>".json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)."</pre>";
       }
    }
