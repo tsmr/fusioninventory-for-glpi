@@ -66,36 +66,36 @@ if (isset($_GET['action'])) {
                   $a_agent['id'],
                   array('collect')
                );
-               foreach ($taskjobstates as $className => $taskjobstate) {
-                  if (!$pfAgentModule->isAgentCanDo("Collect", $agent['id'])) {
+               $order = new \stdClass();
+               $order->jobs = array();
+
+               foreach ($taskjobstates as $taskjobstate) {
+                  if (!$pfAgentModule->isAgentCanDo("Collect", $a_agent['id'])) {
                      $taskjobstate->cancel(
                         __("Collect module has been disabled for this agent", 'fusioninventory')
                      );
                   } else {
-                     $order = new \stdClass();
-                     $order->jobs = array();
-                     foreach ($taskjobstate as $data) {
-                        $out = $pfCollect->run($data, $a_agent);
-                        if (count($out) > 0) {
-                           $oder->jobs[] = $out;
-                        }
-
-                        // change status of state table row
-                        $pfTaskjobstate->changeStatus(
-                           $jobstate['id'],
-                           PluginFusioninventoryTaskjobstate::AGENT_HAS_SENT_DATA
-                        );
-
-                        $a_input = array(
-                           'plugin_fusioninventory_taskjobstates_id'    => $data['id'],
-                           'items_id'                                   => $a_agent['id'],
-                           'itemtype'                                   => 'PluginFusioninventoryAgent',
-                           'date'                                       => date("Y-m-d H:i:s"),
-                           'comment'                                    => '',
-                           'state'                                      => PluginFusioninventoryTaskjoblog::TASK_STARTED
-                       );
-                        $pfTaskjoblog->add($a_input);
+                     $out = $pfCollect->run($taskjobstate, $a_agent);
+                     if (count($out) > 0) {
+                        $order->jobs = array_merge($order->jobs, $out);
                      }
+
+                     // change status of state table row
+                     $pfTaskjobstate->changeStatus(
+                        $taskjobstate->fields['id'],
+                        PluginFusioninventoryTaskjobstate::SERVER_HAS_SENT_DATA
+                     );
+
+                     $a_input = array(
+                        'plugin_fusioninventory_taskjobstates_id'    => $taskjobstate->fields['id'],
+                        'items_id'                                   => $a_agent['id'],
+                        'itemtype'                                   => 'PluginFusioninventoryAgent',
+                        'date'                                       => date("Y-m-d H:i:s"),
+                        'comment'                                    => '',
+                        'state'                                      => PluginFusioninventoryTaskjoblog::TASK_STARTED
+                     );
+                     $pfTaskjoblog->add($a_input);
+
                      if (count($order->jobs > 0)) {
                          $response = $order;
                      }

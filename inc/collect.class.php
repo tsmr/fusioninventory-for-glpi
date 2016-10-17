@@ -470,7 +470,7 @@ class PluginFusioninventoryCollect extends CommonDBTM {
             $pfCollect_Registry = new PluginFusioninventoryCollect_Registry();
             $reg_db = $pfCollect_Registry->find($sql_where);
             foreach ($reg_db as $reg) {
-               $output = array(
+               $output[] = array(
                   'function' => 'getFromRegistry',
                   'path'     => $reg['hive'].
                      $reg['path'] . $reg['key'],
@@ -498,40 +498,42 @@ class PluginFusioninventoryCollect extends CommonDBTM {
             $pfCollect_File = new PluginFusioninventoryCollect_File();
             $files_db = $pfCollect_File->find($sql_where);
             foreach ($files_db as $files) {
-               $output = array(
+               $datafile = array(
                   'function'  => 'findFile',
                   'dir'       => $files['dir'],
                   'limit'     => $files['limit'],
                   'recursive' => $files['is_recursive'],
                   'filter'    => array(
-                     'is_file' => $current['filter_is_file'],
-                     'is_dir'  => $current['filter_is_dir']
+                     'is_file' => $files['filter_is_file'],
+                     'is_dir'  => $files['filter_is_dir']
                   ),
-                  'uuid'      => $taskjob['uniqid'],
-                  '_sid'       => $current['id']
+                  'uuid'      => $taskjobstate->fields['uniqid'],
+                  '_sid'       => $files['id']
                );
                if ($files['filter_regex'] != '') {
-                  $output['filter']['regex'] = $files['filter_regex'];
+                  $datafile['filter']['regex'] = $files['filter_regex'];
                }
                if ($files['filter_sizeequals'] > 0) {
-                  $output['filter']['sizeEquals'] = $files['filter_sizeequals'];
+                  $datafile['filter']['sizeEquals'] = $files['filter_sizeequals'];
                } else if ($files['filter_sizegreater'] > 0) {
-                  $output['filter']['sizeGreater'] = $files['filter_sizegreater'];
+                  $datafile['filter']['sizeGreater'] = $files['filter_sizegreater'];
                } else if ($files['filter_sizelower'] > 0) {
-                  $output['filter']['sizeLower'] = $files['filter_sizelower'];
+                  $datafile['filter']['sizeLower'] = $files['filter_sizelower'];
                }
                if ($files['filter_checksumsha512'] != '') {
-                  $output['filter']['checkSumSHA512'] = $files['filter_checksumsha512'];
+                  $datafile['filter']['checkSumSHA512'] = $files['filter_checksumsha512'];
                }
                if ($files['filter_checksumsha2'] != '') {
-                  $output['filter']['checkSumSHA2'] = $files['filter_checksumsha2'];
+                  $datafile['filter']['checkSumSHA2'] = $files['filter_checksumsha2'];
                }
                if ($files['filter_name'] != '') {
-                  $output['filter']['name'] = $files['filter_name'];
+                  $datafile['filter']['name'] = $files['filter_name'];
                }
                if ($files['filter_iname'] != '') {
-                  $output['filter']['iname'] = $files['filter_iname'];
+                  $datafile['filter']['iname'] = $files['filter_iname'];
                }
+               $output[] = $datafile;
+
                //clean old files
                $query = "DELETE
                          FROM `glpi_plugin_fusioninventory_collects_files_contents`
