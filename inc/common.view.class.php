@@ -119,6 +119,62 @@ class PluginFusioninventoryCommonView extends CommonDBTM {
       echo "</div>";
 
    }
+   
+   public function showDropdownMultipleForItemtype($title, $itemtype, $id, $module_type, $options=array()) {
+      global $CFG_GLPI;
+      echo "<label>" . $title."&nbsp;:" . "</label>";
+      echo "<div class='input_wrap'>";
+      $item = getItemForItemtype($itemtype);
+      $table            = $item->getTable();
+      $where = " 1 ";
+      if ($item->maybeDeleted()) {
+         $where .= " AND `is_deleted` = '0' ";
+      }
+      if ($item->maybeTemplate()) {
+         $where .= " AND `is_template` = '0' ";
+      }
+      $where .= getEntitiesRestrictRequest("AND", $table, '','', $item->maybeRecursive());
+      $add_order = "`$table`.`entities_id`, `$table`.`name`";
+      
+      //remove those already added
+      $taskjob = new PluginFusioninventoryTaskjob();
+      if ($taskjob->getFromDB($id)) {
+         $used = array();
+         $items  = importArrayFromDB($taskjob->fields[$module_type]);
+
+         foreach ($items as $data_item) {
+            $data_itemtype = key($data_item);
+            if($itemtype == $data_itemtype){
+               $used[]  = $data_item[$data_itemtype];
+            }
+         }
+         if (count($used)) {
+            $where .=" AND `$table`.`id` NOT IN ('" . implode("','", $used) . "' ) ";
+         }
+      }
+
+      $tab_items = array();
+      foreach(getAllDatasFromTable($table, $where, false, $add_order ) as $value){
+         if(!isset($entities) || $entities != $value['entities_id']){
+            $entities = $value['entities_id'];
+            $entity = new Entity();
+            $entity->getFromDB($entities);
+            
+         }
+         $tab_items[$entity->getName(array('complete' => true))][$value['id']] = $value['name']." (".$value['id'].")";
+      }
+      $dropdown_options = array_merge(
+         array(
+            'width'=>'100%',
+            'display'=>true,
+            'multiple' => true
+         ),
+         $options
+      );
+      $rand = Dropdown::showFromArray($itemtype, $tab_items, $dropdown_options);
+      echo "</div>";
+      return $rand;
+   }
 
    public function showDropdownForItemtype($title, $itemtype, $options=array()) {
       echo "<label>" . $title."&nbsp;:" . "</label>";
