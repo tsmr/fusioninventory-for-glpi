@@ -1509,7 +1509,8 @@ class PluginFusioninventoryTask extends PluginFusioninventoryTaskView {
 
    static function csvExport($params) {
 
-      $agent_state_types = array('prepared', 'cancelled', 'running','success', 'error' );
+      $agent_state_types = ['prepared', 'cancelled', 'running',
+                            'success', 'error' ];
       if (isset($_REQUEST['agent_state_types'])) {
          $agent_state_types = $_REQUEST['agent_state_types'];
       }
@@ -1569,10 +1570,11 @@ class PluginFusioninventoryTask extends PluginFusioninventoryTaskView {
       echo "Agent".SEP;
       echo "Computer name".SEP;
       echo "Date".SEP;
-      echo "Status".NL;
+      echo "Status".SEP;
+      echo "Last Message".NL;
 
-      $agent_obj = new PluginFusioninventoryAgent;
-      $computer = new Computer;
+      $agent_obj = new PluginFusioninventoryAgent();
+      $computer  = new Computer();
 
       //prepare a temp function for test if an element is the last of an array
       function last(&$array, $key) {
@@ -1610,7 +1612,8 @@ class PluginFusioninventoryTask extends PluginFusioninventoryTaskView {
                      echo NL;
                   } else foreach ($agent as $exec_id => $exec) {
                      echo $exec['last_log_date'].SEP;
-                     echo $exec['state'].NL;
+                     echo $exec['state'].SEP;
+                     echo $exec['last_log'].NL;
                      $log_cpt++;
 
                      if ($_SESSION['fi_include_old_jobs'] != -1
@@ -1642,7 +1645,8 @@ class PluginFusioninventoryTask extends PluginFusioninventoryTaskView {
          echo "</td></tr></table>";
 
          //echo original datas
-         echo "<pre>".json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)."</pre>";
+         echo "<pre>".json_encode($data,
+                                  JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)."</pre>";
       }
    }
 
