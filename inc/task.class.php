@@ -1509,7 +1509,8 @@ class PluginFusioninventoryTask extends PluginFusioninventoryTaskView {
 
    static function csvExport($params) {
 
-      $agent_state_types = array('prepared', 'cancelled', 'running','success', 'error' );
+      $agent_state_types = ['prepared', 'cancelled', 'running',
+                            'success', 'error' ];
       if (isset($_REQUEST['agent_state_types'])) {
          $agent_state_types = $_REQUEST['agent_state_types'];
       }
@@ -1569,10 +1570,11 @@ class PluginFusioninventoryTask extends PluginFusioninventoryTaskView {
       echo "Agent".SEP;
       echo "Computer name".SEP;
       echo "Date".SEP;
-      echo "Status".NL;
+      echo "Status".SEP;
+      echo "Last Message".NL;
 
-      $agent_obj = new PluginFusioninventoryAgent;
-      $computer = new Computer;
+      $agent_obj = new PluginFusioninventoryAgent();
+      $computer  = new Computer();
 
       //prepare a temp function for test if an element is the last of an array
       function last(&$array, $key) {
@@ -1610,7 +1612,8 @@ class PluginFusioninventoryTask extends PluginFusioninventoryTaskView {
                      echo NL;
                   } else foreach ($agent as $exec_id => $exec) {
                      echo $exec['last_log_date'].SEP;
-                     echo $exec['state'].NL;
+                     echo $exec['state'].SEP;
+                     echo $exec['last_log'].NL;
                      $log_cpt++;
 
                      if ($_SESSION['fi_include_old_jobs'] != -1
@@ -1642,7 +1645,8 @@ class PluginFusioninventoryTask extends PluginFusioninventoryTaskView {
          echo "</td></tr></table>";
 
          //echo original datas
-         echo "<pre>".json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)."</pre>";
+         echo "<pre>".json_encode($data,
+                                  JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)."</pre>";
       }
    }
 
@@ -1653,7 +1657,7 @@ class PluginFusioninventoryTask extends PluginFusioninventoryTaskView {
 
       $actions = array();
       $actions[__CLASS__.MassiveAction::CLASS_ACTION_SEPARATOR.'transfert'] = __('Transfer');
-
+      $actions[__CLASS__.MassiveAction::CLASS_ACTION_SEPARATOR.'duplicate'] = _sx('button', 'Duplicate');
       return $actions;
    }
 
@@ -1673,6 +1677,10 @@ class PluginFusioninventoryTask extends PluginFusioninventoryTaskView {
             echo Html::submit(_x('button','Post'), array('name' => 'massiveaction'));
             return true;
             break;
+
+         case "duplicate":
+            echo Html::submit(_x('button','Post'), array('name' => 'massiveaction'));
+            return TRUE;
 
          case 'target_task' :
             echo "<table class='tab_cadre' width='600'>";
@@ -1778,6 +1786,20 @@ class PluginFusioninventoryTask extends PluginFusioninventoryTaskView {
       $pfTaskjob = new PluginFusioninventoryTaskjob();
 
       switch ($ma->getAction()) {
+         case "duplicate":
+            foreach ($ids as $key) {
+            if ($pfTask->getFromDB($key)) {
+               if ($pfTask->duplicate($pfTask->getID())) {
+                  //set action massive ok for this item
+                  $ma->itemDone($item->getType(), $key, MassiveAction::ACTION_OK);
+               } else {
+                  // KO
+                  $ma->itemDone($item->getType(), $key, MassiveAction::ACTION_KO);
+               }
+            }
+         }
+         break;
+
          case "transfert" :
 
             foreach($ids as $key) {
@@ -1853,5 +1875,31 @@ class PluginFusioninventoryTask extends PluginFusioninventoryTaskView {
 
       }
    }
-}
 
+   /**
+   * Duplicate a task
+   * @param $source_tasks_id the ID of the task to duplicate
+   * @return void
+   */
+   function duplicate($source_tasks_id) {
+      $result = true;
+      if ($this->getFromDB($source_tasks_id)) {
+         $input              = $this->fields;
+         $input['name']      = sprintf(__('Copy of %s'),
+                                       $this->fields['name']);
+         $input['is_active'] = false;
+         unset($input['id']);
+         $input              = Toolbox::addslashes_deep($input);
+         if ($target_task_id = $this->add($input)) {
+            //Clone taskjobs
+            $result
+               = PluginFusioninventoryTaskjob::duplicate($source_tasks_id, $target_task_id);
+         } else {
+            $result = false;
+         }
+      } else {
+         $result = false;
+      }
+      return $result;
+   }
+}
